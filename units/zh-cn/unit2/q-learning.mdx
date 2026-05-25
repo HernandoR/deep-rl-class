@@ -1,0 +1,158 @@
+# 介绍 Q-Learning [[q-learning]]
+## 什么是 Q-Learning？ [[what-is-q-learning]]
+
+Q-Learning 是 **基于离策略价值的方法，使用 TD 方法来训练其动作价值函数：**
+
+- *政策外*：我们将在本单元结束时讨论这个问题。
+- *基于价值的方法*：通过训练价值或行动价值函数来间接找到最优策略，该函数将告诉我们 **每个状态或每个状态-动作对的值。**
+- *TD方法：* **在每一步而不是在剧集结束时更新其动作值函数。**
+
+**Q-Learning 是我们用来训练 Q 函数的算法**, 一个 **行动价值函数** 它决定了处于特定状态并在该状态下采取特定行动的价值。
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-function.jpg" alt="Q-function"/>
+  <figcaption>给定一个状态和动作，我们的 Q 函数输出一个状态-动作值 (也称为 Q 值)</figcaption>
+</figure>
+
+的 **Q来自“质量” (价值) 该状态下的该操作。**
+
+让我们回顾一下价值和奖励之间的区别：
+
+- 的 *国家的价值*，或一个 *状态-动作对* 是我们的代理从这个状态开始时获得的预期累积奖励 (或状态-动作对) 然后根据其政策采取行动。
+- 的 *奖励* 是 **从环境中得到的反馈** 在某个状态执行操作后。
+
+在内部，我们的 Q 函数编码为 **Q-table，每个单元格对应一个状态-动作对值的表。** 将此 Q 表视为 **我们的 Q 函数的内存或备忘单。**
+
+让我们来看一个迷宫的例子。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Maze-1.jpg" alt="Maze example"/>
+
+Q 表被初始化。这就是为什么所有值都 = 0。此表 **对于每个状态和动作，包含相应的状态-动作值。** 
+对于这个简单的示例，状态仅由鼠标的位置定义。因此，我们有 2*我们的 Q 表中有 3 行，一行代表鼠标的每个可能位置。在更复杂的场景中，状态可能包含比参与者的位置更多的信息。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Maze-2.jpg" alt="Maze example"/>
+
+在这里我们看到 **初始状态和上升状态的state-action值为0：**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Maze-3.jpg" alt="Maze example"/>
+
+所以：Q 函数使用 Q 表 **具有每个状态-动作对的值。** 给定一个状态和动作， **我们的 Q 函数将在其 Q 表内搜索以输出值。**
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-function-2.jpg" alt="Q-function"/>
+</figure>
+
+如果我们回顾一下， *Q-Learning* **RL 算法是：**
+
+- 火车 *Q函数* (一个 **行动价值函数**)，其内部是一个 **包含所有状态-动作对值的 Q 表。**
+- 给定一个状态和动作，我们的 Q 函数 **将在其 Q 表中搜索相应的值。**
+- 当训练结束后， **我们有一个最优的 Q 函数，这意味着我们有最优的 Q 表。**
+- 如果我们 **具有最优 Q 函数**，我们 **有一个最优的政策** 自从我们 **了解在每个状态下应采取的最佳行动。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/link-value-policy.jpg" alt="Link value policy"/>
+
+
+一开始， **我们的 Q 表是无用的，因为它为每个状态-动作对提供任意值** (大多数时候，我们将Q表初始化为0)。作为代理 **探索环境并更新 Q 表，它将为我们提供越来越好的近似值** 到最优策略。
+
+<figure class="image table text-center m-0 w-full">
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-1.jpg" alt="Q-learning"/>
+  <figcaption>我们在这里看到，通过训练，我们的 Q 表变得更好，因为有了它，我们可以知道每个状态-动作对的值。</figcaption>
+</figure>
+
+现在我们了解了 Q-Learning、Q 函数和 Q 表是什么， **让我们更深入地研究 Q-Learning 算法**.
+
+## Q-Learning 算法 [[q-learning-algo]]
+
+这是 Q-Learning 伪代码；让我们研究一下每个部分 **在实现之前通过一个简单的示例了解它是如何工作的。** 不要被它吓倒，它比看起来简单！我们将详细介绍每个步骤。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-2.jpg" alt="Q-learning"/>
+
+### 步骤 1：我们初始化 Q 表 [[step1]]
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-3.jpg" alt="Q-learning"/>
+
+
+我们需要为每个状态-动作对初始化 Q 表。 **大多数时候，我们使用 0 值进行初始化。**
+
+### 步骤 2：使用 epsilon-greedy 策略选择一个操作 [[step2]]
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-4.jpg" alt="Q-learning"/>
+
+
+epsilon-greedy 策略是一种处理探索/利用权衡的策略。
+
+这个想法是，初始值为 ɛ = 1.0：
+
+- *概率为 1 — ɛ*：我们做 **剥削** (也就是我们的代理选择具有最高状态-动作对值的动作).
+- 概率为 ɛ： **我们进行探索** (尝试随机动作).
+
+训练之初， **进行探索的概率会很大，因为 ɛ 非常高，所以大多数时候我们都会探索。** 但随着训练的进行，我们的 **Q-table 的估计越来越好，我们逐渐降低 epsilon 值** 因为我们将需要越来越少的探索和更多的开发。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-5.jpg" alt="Q-learning"/>
+
+
+### 步骤3：执行动作At，获得奖励Rt+1和下一个状态St+1 [[step3]]
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-6.jpg" alt="Q-learning"/>
+
+### 第 4 步：更新 Q(圣，在) [[step4]]
+
+请记住，在 TD Learning 中，我们更新我们的策略或价值函数 (取决于我们选择的 RL 方法) **经过一步交互后。**
+
+为了产生我们的 TD 目标， **我们使用了即时奖励 \\(R_{t+1}\\) 加上下一个状态的折扣值**，通过查找在下一状态下最大化当前 Q 函数的动作来计算。 (我们称之为引导程序).
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-7.jpg" alt="Q-learning"/>
+
+因此，我们的\\(Q(S_t, A_t)\\) **更新公式如下：**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-8.jpg" alt="Q-learning"/>
+
+
+这意味着要更新我们的 \\(Q(S_t, A_t)\\):
+
+- 我们需要 \\(S_t, A_t, R_{t+1}, S_{t+1}\\).
+- 为了更新给定状态-动作对的 Q 值，我们使用 TD 目标。
+
+我们如何制定TD目标？
+1. 我们获得奖励 \\(R_{t+1}\\) 采取行动后 \\(A_t\\).
+2. 为了得到 **最佳状态-动作对值** 对于下一个状态，我们使用贪心策略来选择下一个最佳动作。请注意，这不是 epsilon 贪婪策略，这将始终采取具有最高状态操作值的操作。
+
+然后，当这个 Q 值的更新完成时，我们从一个新的状态开始并选择我们的动作 **再次使用 epsilon 贪婪策略。**
+
+**这就是为什么我们说 Q Learning 是一种离策略算法。**
+
+## 离策略与在策略 [[off-vs-on]]
+
+区别很微妙：
+
+- *政策外*：使用 **不同的行动政策 (推论) 并更新 (培训).**
+
+例如，对于 Q-Learning，epsilon 贪婪策略 (执行政策)，与贪婪策略不同的是 **用于选择最佳的下一状态动作值来更新我们的 Q 值 (更新政策).**
+
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/off-on-1.jpg" alt="Off-on policy"/>
+  <figcaption>代理政策</figcaption>
+</figure>
+
+与我们在训练部分使用的策略不同：
+
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/off-on-2.jpg" alt="Off-on policy"/>
+  <figcaption>更新政策</figcaption>
+</figure>
+
+- *政策上：* 使用 **执行和更新的政策相同。**
+
+例如，对于另一种基于值的算法 Sarsa， **epsilon-贪婪策略选择下一个状态-动作对，而不是贪婪策略。**
+
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/off-on-3.jpg" alt="Off-on policy"/>
+    <figcaption>萨尔萨</figcaption>
+</figure>
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/off-on-4.jpg" alt="Off-on policy"/>
+</figure>

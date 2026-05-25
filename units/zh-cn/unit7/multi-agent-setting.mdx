@@ -1,0 +1,57 @@
+# 设计多代理系统
+
+在本节中，您将观看由 <a href="https://www.youtube.com/channel/UCq0imsn84ShAe9PBOFnoIrg"> 布莱恩·道格拉斯 </a>.
+
+<Youtube id="qgb0gyrpiGk" />
+
+
+在这段视频中，Brian 讲述了如何设计多代理系统。他特地拿了吸尘器的多代理系统问道： **怎样才能互相合作**?
+
+我们有两种解决方案来设计这个多智能体强化学习系统 (MARL).
+
+## 去中心化系统
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit10/decentralized.png" alt="Decentralized"/>
+<figcaption>
+来源： <a href="https://www.youtube.com/watch?v=qgb0gyrpiGk"> 多智能体强化学习简介 </a>
+</figcaption>
+</figure>
+
+在去中心化学习中， **每个智能体都独立于其他智能体进行训练**。在给出的示例中，每个真空吸尘器都会学习清洁尽可能多的地方 **不关心其他吸尘器 (代理人) 正在做**.
+
+这样做的好处是 **由于代理之间没有共享信息，因此可以像训练单个代理一样设计和训练这些真空吸尘器**.
+
+这里的想法是 **我们的训练代理会将其他代理视为环境动态的一部分**。不作为代理。
+
+然而，该技术的一大缺点是它会 **使环境变得非平稳** 因为底层马尔可夫决策过程随着时间的推移而变化，因为其他代理也在环境中交互。
+这对于许多强化学习算法来说都是有问题的 **在非平稳环境下无法达到全局最优**.
+
+## 集中式方法
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit10/centralized.png" alt="Centralized"/>
+<figcaption>
+来源： <a href="https://www.youtube.com/watch?v=qgb0gyrpiGk"> 多智能体强化学习简介 </a>
+</figcaption>
+</figure>
+
+在这个架构中， **我们有一个收集代理经验的高级流程**：经验缓冲。我们将利用这些经验 **学习共同政策**.
+
+例如，在吸尘器示例中，观察结果将是：
+- 真空吸尘器的覆盖范围图。
+- 所有真空吸尘器的位置。
+
+我们利用集体经验 **训练一项策略，使所有三个机器人整体上以最有利的方式移动**。因此，每个机器人都在从共同的经验中学习。
+我们现在有一个固定的环境，因为所有代理都被视为一个更大的实体，并且他们知道其他代理策略的变化 (因为它和他们的一样).
+
+如果我们回顾一下：
+
+- 在一个 *分散方式*，我们 **独立对待所有智能体，而不考虑其他智能体的存在。**
+  - 在这种情况下，所有代理 **将其他主体视为环境的一部分**.
+  - **这是一个非平稳的环境条件**，因此不能保证收敛。
+
+- 在一个 *集中式方法*:
+  - 一个 **从所有代理处学习单一策略**.
+  - 将环境的当前状态作为输入，政策输出联合行动。
+  - 奖励是全球性的。

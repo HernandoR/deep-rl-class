@@ -1,0 +1,63 @@
+# 贝尔曼方程：简化我们的价值估计 [[bellman-equation]]
+
+贝尔曼方程 **简化了我们的状态值或状态动作值计算。**
+
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/bellman.jpg" alt="Bellman equation"/>
+
+根据到目前为止我们所学到的知识，我们知道如果我们计算 \\(V(S_t)\\) (国家的价值)，我们需要从该状态开始计算回报，然后永远遵循该策略。 **(我们在下面的例子中定义的策略是贪婪策略；为了简单起见，我们不打折奖励).**
+
+所以要计算 \\(V(S_t)\\)，我们需要计算预期奖励的总和。因此：
+
+<figure>
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/bellman2.jpg" alt="Bellman equation"/>
+  <figcaption>计算状态 1 的值：如果代理从该状态开始然后遵循贪婪策略，则奖励总和 (采取行动实现最佳国家价值观) 对于所有时间步长。</figcaption>
+</figure>
+
+然后，要计算 \\(V(S_{t+1})\\)，我们需要计算从该状态开始的回报 \\(S_{t+1}\\).
+
+<figure>
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/bellman3.jpg" alt="Bellman equation"/>
+  <figcaption>计算状态2的价值：奖励总和 <b>如果代理在该状态下启动</b>，然后按照 <b>所有时间步骤的策略。</b></figcaption>
+</figure>
+
+所以您可能已经注意到，我们正在重复计算不同状态的值，如果您需要为每个状态值或状态动作值执行此操作，这可能会很乏味。
+
+不是计算每个状态或每个状态-动作对的预期回报， **我们可以使用贝尔曼方程。** (提示：如果您知道什么是动态规划，那么这非常相似！如果您不知道它是什么，不用担心！)
+
+贝尔曼方程是一个递归方程，其工作原理如下：我们可以将任何状态的值视为：
+
+**即时奖励  \\(R_{t+1}\\)  + 随后状态的折扣值 ( \\(\gamma * V(S_{t+1}) \\) ) .**
+
+<figure>
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/bellman4.jpg" alt="Bellman equation"/>
+</figure>
+
+
+如果我们回到我们的例子，我们可以说状态 1 的值等于我们从该状态开始的预期累积回报。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/bellman2.jpg" alt="Bellman equation"/>
+
+
+计算状态1的价值：奖励总和 **如果代理在该状态 1 下启动** 然后按照 **所有时间步骤的策略。**
+
+这相当于  \\(V(S_{t})\\)  = 立即奖励  \\(R_{t+1}\\)  + 下一个状态的折扣值  \\(\gamma * V(S_{t+1})\\)
+
+<figure>
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/bellman6.jpg" alt="Bellman equation"/>
+  <figcaption>为了简单起见，这里我们不打折，所以 gamma = 1。</figcaption>
+</figure>
+
+为了简单起见，这里我们不打折，所以gamma = 1。
+但您将在本单元的 Q-Learning 部分中研究 gamma = 0.99 的示例。
+
+- 的价值  \\(V(S_{t+1}) \\)  = 立即奖励  \\(R_{t+2}\\)  + 下一个状态的折扣值 ( \\(gamma * V(S_{t+2})\\) ).
+- 等等。
+
+
+
+
+
+回顾一下，贝尔曼方程的思想是，不是将每个值计算为预期回报的总和， **这是一个漫长的过程**，我们将该值计算为 **立即奖励+后续状态的折扣值之和。**
+
+在进入下一节之前，请考虑一下伽玛在贝尔曼方程中的作用。如果 gamma 值非常低会发生什么 (例如0.1甚至0)？如果值为 1 会发生什么？如果价值非常高，例如一百万，会发生什么？

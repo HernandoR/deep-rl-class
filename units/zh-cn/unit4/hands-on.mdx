@@ -1,0 +1,1028 @@
+# 动手实践
+
+
+
+      <CourseFloatingBanner classNames="absolute z-10 right-0 top-0"
+      笔记本={[
+        {label: "Google Colab", value: "https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit4/unit4.ipynb"}
+        ]}
+        AskForHelpUrl="http://hf.co/join/discord" />
+
+
+
+现在我们已经研究了 Reinforce 背后的理论， **您已准备好使用 PyTorch 编码您的 Reinforce 代理**。您将使用 CartPole-v1 和 PixelCopter 测试其稳健性。
+
+然后，您将能够针对更高级的环境迭代和改进此实现。
+
+<figure class="image table text-center m-0 w-full">
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit6/envs.gif" alt="Environments"/>
+</figure>
+
+
+为了验证认证过程的实际操作，您需要将经过训练的模型推送到 Hub 并且：
+
+- 获得 >= 350 的结果 `Cartpole-v1`
+- 获得 >= 5 的结果 `PixelCopter`.
+
+要找到您的结果，请转到排行榜并找到您的模型， **结果 =mean_reward - 奖励标准差**. **如果您在排行榜上没有看到您的模型，请转到排行榜页面底部，然后单击刷新按钮**.
+
+**如果找不到您的型号，请转到页面底部并单击刷新按钮。**
+
+有关认证过程的更多信息，请查看此部分👉 https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process
+
+您可以在这里查看您的进度 👉 https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course
+
+
+**要开始实践，请单击 Open In Colab 按钮** 👇 :
+
+[![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit4/unit4.ipynb)
+
+我们强烈 **建议学生使用 Google Colab 进行实践练习** 而不是在个人计算机上运行它们。 
+
+通过使用 Google Colab， **您可以专注于学习和实验，而不必担心技术方面的问题** 设置您的环境。
+
+# 第 4 单元：使用 PyTorch 编写您的第一个深度强化学习算法：强化。并测试其稳健性 💪
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit6/thumbnail.png" alt="thumbnail"/>
+
+
+在此笔记本中，您将从头开始编写第一个深度强化学习算法：Reinforce (也称为蒙特卡罗策略梯度).
+
+强化是一个 *基于策略的方法*：一种尝试的深度强化学习算法 **不使用动作值函数直接优化策略**.
+
+更准确地说，强化是 *策略梯度法*，一个子类 *基于政策的方法* 其目的是 **通过使用梯度上升估计最优策略的权重来直接优化策略**.
+
+为了测试其稳健性，我们将在 2 个不同的简单环境中对其进行训练：
+- Cartpole-v1
+- 像素直升机环境
+
+⬇️ 这是一个例子 **您将在本笔记本结束时实现。** ⬇️
+
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit6/envs.gif" alt="Environments"/>
+
+
+### 🎮 环境：
+
+- [CartPole-v1](https://www.gymlibrary.dev/environments/classic_control/cart_pole/)
+- [像素直升机](https://pygame-learning-environment.readthedocs.io/en/latest/user/games/pixelcopter.html)
+
+### 📚 RL-库：
+
+- 蟒蛇
+- PyTorch
+
+
+我们一直在努力改进我们的教程，所以 **如果您发现此笔记本存在问题**，请 [在 GitHub 存储库上提出问题](https://github.com/huggingface/deep-rl-class/issues).
+
+## 本笔记本的目标🏆
+
+在笔记本的最后，您将：
+
+- 能够 **使用 PyTorch 从头开始编写强化算法。**
+- 能够 **使用简单的环境测试代理的稳健性。**
+- 能够 **将您训练有素的代理推送到 Hub** 带有精彩的视频回放和评估分数🔥。
+
+## 先决条件🏗️
+
+在深入了解笔记本之前，您需要：
+
+🔲 📚 [通过阅读第 4 单元来研究政策梯度](https://huggingface.co/deep-rl-course/unit4/introduction)
+
+# 让我们从头开始编写强化算法 🔥
+
+## 一些建议💡
+
+最好在您的 Google 云端硬盘上运行此 Colab 副本，以便 **如果超时** 您的 Google 云端硬盘上仍然保留着已保存的笔记本，无需从头开始填写所有内容。
+
+要做到这一点，你可以这样做 `Ctrl + S` 或 `File > Save a copy in Google Drive.`
+
+## 设置 GPU 💪
+
+- 至 **加速代理的训练，我们将使用 GPU**。为此，请转至 `Runtime > Change Runtime type`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step1.jpg" alt="GPU Step 1">
+
+- `Hardware Accelerator > GPU`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step2.jpg" alt="GPU Step 2">
+
+## 创建虚拟显示🖥
+
+在笔记本过程中，我们需要生成重播视频。为此，通过 Colab， **我们需要一个虚拟屏幕来渲染环境** (从而记录帧).
+
+以下单元格将安装库并创建并运行虚拟屏幕🖥
+
+```python
+%%capture
+!apt install python-opengl
+!apt install ffmpeg
+!apt install xvfb
+!pip install pyvirtualdisplay
+!pip install pyglet==1.5.1
+```
+
+```python
+# Virtual display
+from pyvirtualdisplay import Display
+
+virtual_display = Display(visible=0, size=(1400, 900))
+virtual_display.start()
+```
+
+## 安装依赖项🔽
+
+第一步是安装依赖项。我们将安装多个：
+
+- `gym`
+- `gym-games`：使用 PyGame 制作的额外Gym 环境。
+- `huggingface_hub`：Hub 是任何人都可以共享和探索模型和数据集的中心位置。它具有版本控制、指标、可视化和其他功能，可让您轻松与他人协作。
+
+您可能想知道为什么我们安装gym而不是gymnasium（更新版本的gym）？ **因为我们使用的gym-games还没有更新为 gymnasium**. 
+
+您将在这里遇到的差异：
+- 在 `gym` 我们没有 `terminated` 和 `truncated` 但仅 `done`.
+- 在 `gym` 使用 `env.step()` 回报 `state, reward, done, info`
+
+您可以在这里了解更多关于Gym和Gymnasium之间的区别👉 https://gymnasium.farama.org/content/migration-guide/
+
+您可以在这里看到所有可用的 Reinforce 模型 👉 https://huggingface.co/models?other=reinforce
+
+您可以在这里找到所有深度强化学习模型👉 https://huggingface.co/models?pipeline_tag=reinforcement-learning
+
+
+```bash
+!pip install -r https://raw.githubusercontent.com/huggingface/deep-rl-class/main/notebooks/unit4/requirements-unit4.txt
+```
+
+## 导入包📦
+
+除了导入已安装的库之外，我们还导入：
+
+- `imageio`：一个可以帮助我们生成重播视频的库
+
+
+
+```python
+import numpy as np
+
+from collections import deque
+
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+# PyTorch
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.distributions import Categorical
+
+# Gym
+import gym
+import gym_pygame
+
+# Hugging Face Hub
+from huggingface_hub import notebook_login # To log to our Hugging Face account to be able to upload models to the Hub.
+import imageio
+```
+
+## 检查我们是否有 GPU
+
+- 让我们检查一下是否有 GPU
+- 如果是这样的话你应该看看 `device:cuda0`
+
+```python
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+```
+
+```python
+print(device)
+```
+
+我们现在准备好实施我们的强化算法🔥
+
+# 第一个代理：玩 CartPole-v1 🤖
+
+## 创建 CartPole 环境并了解其工作原理
+
+### [环境🎮](https://www.gymlibrary.dev/environments/classic_control/cart_pole/)
+
+### 为什么我们使用CartPole-v1这样的简单环境？
+
+正如中所解释的 [强化学习提示和技巧](https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html)，当你从头开始实现你的代理时，你需要 **在深入研究之前确保它正常工作并在简单的环境中找到错误** 因为在简单的环境中查找错误会容易得多。
+
+
+> 尝试在玩具问题上有一些“生命迹象”
+
+
+> 通过使其在越来越难的环境上运行来验证实现 (您可以将结果与 RL 动物园进行比较)。您通常需要为该步骤运行超参数优化。
+
+
+### CartPole-v1 环境
+
+> 一根杆子通过非驱动接头连接到小车上，小车沿着无摩擦的轨道移动。摆锤垂直放置在小车上，目标是通过在小车上向左和向右施加力来平衡杆。
+
+
+
+因此，我们从 CartPole-v1 开始。目标是将小车向左或向右推 **从而使杆保持平衡。**
+
+如果满足以下条件，则该剧集结束：
+- 极角大于±12°
+- 小车位置大于±2.4
+- 剧集长度大于500
+
+当极点保持平衡时，我们每个时间步都会得到 +1 的奖励💰。
+
+```python
+env_id = "CartPole-v1"
+# Create the env
+env = gym.make(env_id)
+
+# Create the evaluation env
+eval_env = gym.make(env_id)
+
+# Get the state space and action space
+s_size = env.observation_space.shape[0]
+a_size = env.action_space.n
+```
+
+```python
+print("_____OBSERVATION SPACE_____ \n")
+print("The State Space is: ", s_size)
+print("Sample observation", env.observation_space.sample())  # Get a random observation
+```
+
+```python
+print("\n _____ACTION SPACE_____ \n")
+print("The Action Space is: ", a_size)
+print("Action Space Sample", env.action_space.sample())  # Take a random action
+```
+
+## 让我们构建强化架构
+
+该实现基于三个实现：
+- [PyTorch官方强化学习示例](https://github.com/pytorch/examples/blob/main/reinforcement_learning/reinforce.py)
+- [优达学城强化](https://github.com/udacity/deep-reinforcement-learning/blob/master/reinforce/REINFORCE.ipynb)
+- [Chris1nexus 改进了集成](https://github.com/huggingface/deep-rl-class/pull/95)
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit6/reinforce.png" alt="Reinforce"/>
+
+所以我们想要：
+- 两个全连接层 (FC1 和 FC2).
+- 使用ReLU作为fc1的激活函数
+- 使用 Softmax 输出动作的概率分布
+
+```python
+class Policy(nn.Module):
+    def __init__(self, s_size, a_size, h_size):
+        super(Policy, self).__init__()
+        # Create two fully connected layers
+
+
+
+    def forward(self, x):
+        # Define the forward pass
+        # state goes to fc1 then we apply ReLU activation function
+
+        # fc1 outputs goes to fc2
+
+        # We output the softmax
+
+    def act(self, state):
+        """
+        Given a state, take action
+        """
+        state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        probs = self.forward(state).cpu()
+        m = Categorical(probs)
+        action = np.argmax(m)
+        return action.item(), m.log_prob(action)
+```
+
+### 解决方案
+
+```python
+class Policy(nn.Module):
+    def __init__(self, s_size, a_size, h_size):
+        super(Policy, self).__init__()
+        self.fc1 = nn.Linear(s_size, h_size)
+        self.fc2 = nn.Linear(h_size, a_size)
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return F.softmax(x, dim=1)
+
+    def act(self, state):
+        state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        probs = self.forward(state).cpu()
+        m = Categorical(probs)
+        action = np.argmax(m)
+        return action.item(), m.log_prob(action)
+```
+
+我犯了一个错误，你能猜出哪里错了吗？
+
+- 为了找出答案，让我们进行一次前向传递：
+
+```python
+debug_policy = Policy(s_size, a_size, 64).to(device)
+debug_policy.act(env.reset())
+```
+
+- 在这里我们看到错误说 `ValueError: The value argument to log_prob must be a Tensor`
+
+- 这意味着 `action` 在 `m.log_prob(action)` 必须是张量 **但事实并非如此。**
+
+- 你知道为什么吗？检查 act 函数并尝试看看为什么它不起作用。
+
+建议💡：这个实现中有些问题。请记住，对于 act 函数 **我们想从动作的概率分布中采样一个动作**.
+
+
+### (真实) 解决方案
+
+```python
+class Policy(nn.Module):
+    def __init__(self, s_size, a_size, h_size):
+        super(Policy, self).__init__()
+        self.fc1 = nn.Linear(s_size, h_size)
+        self.fc2 = nn.Linear(h_size, a_size)
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return F.softmax(x, dim=1)
+
+    def act(self, state):
+        state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        probs = self.forward(state).cpu()
+        m = Categorical(probs)
+        action = m.sample()
+        return action.item(), m.log_prob(action)
+```
+
+通过使用 CartPole，调试起来更加容易，因为 **我们知道错误来自我们的集成而不是来自我们的简单环境**.
+
+- 自从 **我们想从动作的概率分布中采样一个动作**，我们不能使用 `action = np.argmax(m)` 因为它总是会输出概率最高的动作。
+
+- 我们需要将其替换为 `action = m.sample()` 将从概率分布 P 中采样一个动作(.|s)
+
+### 让我们构建强化训练算法
+这是强化算法伪代码：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit6/pg_pseudocode.png" alt="Policy gradient pseudocode"/>
+
+
+- 当我们计算回报Gt时 (6号线)，我们看到我们计算了折扣奖励的总和 **从时间步 t 开始**.
+
+- 为什么？因为我们的政策应该只 **根据后果强化行动**：所以在采取行动之前获得的奖励是没有用的 (因为他们不是因为行动), **只有行动之后发生的事情才重要**.
+
+- 在编码之前，您应该阅读本节 [不要让过去分散你的注意力](https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html#don-t-let-the-past-distract-you) 这解释了为什么我们使用奖励策略梯度。
+
+我们使用一种有趣的技术，编码为 [克里斯1联结](https://github.com/Chris1nexus) 到 **有效计算每个时间步的回报**。评论解释了程序。也不要犹豫 [查看PR解释](https://github.com/huggingface/deep-rl-class/pull/95)
+但总的来说，这个想法是 **有效计算每个时间步的回报**.
+
+您可能会问的第二个问题是 **为什么我们要尽量减少损失**？我们之前不是讨论了梯度上升，而不是梯度下降吗？
+
+- 我们想要最大化我们的效用函数 $J(\theta)$，但在 PyTorch 和 TensorFlow 中，最好 **最小化目标函数。**
+    - 假设我们想在某个时间步强化行动 3。在训练这个动作之前，P 是 0.25。
+    - 所以我们要修改 \\(theta \\) 这样 \\(\pi_\theta(a_3|s; \theta) > 0.25 \\)
+    - 因为所有 P 之和必须为 1，max \\(pi_\theta(a_3|s; \theta)\\) 会 **最小化其他行动的概率。**
+    - 所以我们应该告诉 PyTorch **至分钟 \\(1 - \pi_\theta(a_3|s; \theta)\\).**
+    - 该损失函数接近 0，如下所示 \\(\pi_\theta(a_3|s; \theta)\\) 接近 1。
+    - 所以我们鼓励梯度最大\\(\pi_\theta(a_3|s; \theta)\\)
+
+
+```python
+def reinforce(policy, optimizer, n_training_episodes, max_t, gamma, print_every):
+    # Help us to calculate the score during the training
+    scores_deque = deque(maxlen=100)
+    scores = []
+    # Line 3 of pseudocode
+    for i_episode in range(1, n_training_episodes+1):
+        saved_log_probs = []
+        rewards = []
+        state = # TODO: reset the environment
+        # Line 4 of pseudocode
+        for t in range(max_t):
+            action, log_prob = # TODO get the action
+            saved_log_probs.append(log_prob)
+            state, reward, done, _ = # TODO: take an env step
+            rewards.append(reward)
+            if done:
+                break
+        scores_deque.append(sum(rewards))
+        scores.append(sum(rewards))
+
+        # Line 6 of pseudocode: calculate the return
+        returns = deque(maxlen=max_t)
+        n_steps = len(rewards)
+        # Compute the discounted returns at each timestep,
+        # as the sum of the gamma-discounted return at time t (G_t) + the reward at time t
+
+        # In O(N) time, where N is the number of time steps
+        # (this definition of the discounted return G_t follows the definition of this quantity
+        # shown at page 44 of Sutton&Barto 2017 2nd draft)
+        # G_t = r_(t+1) + r_(t+2) + ...
+
+        # Given this formulation, the returns at each timestep t can be computed
+        # by re-using the computed future returns G_(t+1) to compute the current return G_t
+        # G_t = r_(t+1) + gamma*G_(t+1)
+        # G_(t-1) = r_t + gamma* G_t
+        # (this follows a dynamic programming approach, with which we memorize solutions in order
+        # to avoid computing them multiple times)
+
+        # This is correct since the above is equivalent to (see also page 46 of Sutton&Barto 2017 2nd draft)
+        # G_(t-1) = r_t + gamma*r_(t+1) + gamma*gamma*r_(t+2) + ...
+
+
+        ## Given the above, we calculate the returns at timestep t as:
+        #               gamma[t] * return[t] + reward[t]
+        #
+        ## We compute this starting from the last timestep to the first, in order
+        ## to employ the formula presented above and avoid redundant computations that would be needed
+        ## if we were to do it from first to last.
+
+        ## Hence, the queue "returns" will hold the returns in chronological order, from t=0 to t=n_steps
+        ## thanks to the appendleft() function which allows to append to the position 0 in constant time O(1)
+        ## a normal python list would instead require O(N) to do this.
+        for t in range(n_steps)[::-1]:
+            disc_return_t = (returns[0] if len(returns)>0 else 0)
+            returns.appendleft(    ) # TODO: complete here
+
+        ## standardization of the returns is employed to make training more stable
+        eps = np.finfo(np.float32).eps.item()
+
+        ## eps is the smallest representable float, which is
+        # added to the standard deviation of the returns to avoid numerical instabilities
+        returns = torch.tensor(returns)
+        returns = (returns - returns.mean()) / (returns.std() + eps)
+
+        # Line 7:
+        policy_loss = []
+        for log_prob, disc_return in zip(saved_log_probs, returns):
+            policy_loss.append(-log_prob * disc_return)
+        policy_loss = torch.cat(policy_loss).sum()
+
+        # Line 8: PyTorch prefers gradient descent
+        optimizer.zero_grad()
+        policy_loss.backward()
+        optimizer.step()
+
+        if i_episode % print_every == 0:
+            print('Episode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_deque)))
+
+    return scores
+```
+
+#### 解决方案
+
+```python
+def reinforce(policy, optimizer, n_training_episodes, max_t, gamma, print_every):
+    # Help us to calculate the score during the training
+    scores_deque = deque(maxlen=100)
+    scores = []
+    # Line 3 of pseudocode
+    for i_episode in range(1, n_training_episodes + 1):
+        saved_log_probs = []
+        rewards = []
+        state = env.reset()
+        # Line 4 of pseudocode
+        for t in range(max_t):
+            action, log_prob = policy.act(state)
+            saved_log_probs.append(log_prob)
+            state, reward, done, _ = env.step(action)
+            rewards.append(reward)
+            if done:
+                break
+        scores_deque.append(sum(rewards))
+        scores.append(sum(rewards))
+
+        # Line 6 of pseudocode: calculate the return
+        returns = deque(maxlen=max_t)
+        n_steps = len(rewards)
+        # Compute the discounted returns at each timestep,
+        # as
+        #      the sum of the gamma-discounted return at time t (G_t) + the reward at time t
+        #
+        # In O(N) time, where N is the number of time steps
+        # (this definition of the discounted return G_t follows the definition of this quantity
+        # shown at page 44 of Sutton&Barto 2017 2nd draft)
+        # G_t = r_(t+1) + r_(t+2) + ...
+
+        # Given this formulation, the returns at each timestep t can be computed
+        # by re-using the computed future returns G_(t+1) to compute the current return G_t
+        # G_t = r_(t+1) + gamma*G_(t+1)
+        # G_(t-1) = r_t + gamma* G_t
+        # (this follows a dynamic programming approach, with which we memorize solutions in order
+        # to avoid computing them multiple times)
+
+        # This is correct since the above is equivalent to (see also page 46 of Sutton&Barto 2017 2nd draft)
+        # G_(t-1) = r_t + gamma*r_(t+1) + gamma*gamma*r_(t+2) + ...
+
+        ## Given the above, we calculate the returns at timestep t as:
+        #               gamma[t] * return[t] + reward[t]
+        #
+        ## We compute this starting from the last timestep to the first, in order
+        ## to employ the formula presented above and avoid redundant computations that would be needed
+        ## if we were to do it from first to last.
+
+        ## Hence, the queue "returns" will hold the returns in chronological order, from t=0 to t=n_steps
+        ## thanks to the appendleft() function which allows to append to the position 0 in constant time O(1)
+        ## a normal python list would instead require O(N) to do this.
+        for t in range(n_steps)[::-1]:
+            disc_return_t = returns[0] if len(returns) > 0 else 0
+            returns.appendleft(gamma * disc_return_t + rewards[t])
+
+        ## standardization of the returns is employed to make training more stable
+        eps = np.finfo(np.float32).eps.item()
+        ## eps is the smallest representable float, which is
+        # added to the standard deviation of the returns to avoid numerical instabilities
+        returns = torch.tensor(returns)
+        returns = (returns - returns.mean()) / (returns.std() + eps)
+
+        # Line 7:
+        policy_loss = []
+        for log_prob, disc_return in zip(saved_log_probs, returns):
+            policy_loss.append(-log_prob * disc_return)
+        policy_loss = torch.cat(policy_loss).sum()
+
+        # Line 8: PyTorch prefers gradient descent
+        optimizer.zero_grad()
+        policy_loss.backward()
+        optimizer.step()
+
+        if i_episode % print_every == 0:
+            print("Episode {}\tAverage Score: {:.2f}".format(i_episode, np.mean(scores_deque)))
+
+    return scores
+```
+
+##  训练它
+- 我们现在准备培训我们的代理。
+- 但首先，我们定义一个包含所有训练超参数的变量。
+- 您可以更改训练参数 (并且应该😉)
+
+```python
+cartpole_hyperparameters = {
+    "h_size": 16,
+    "n_training_episodes": 1000,
+    "n_evaluation_episodes": 10,
+    "max_t": 1000,
+    "gamma": 1.0,
+    "lr": 1e-2,
+    "env_id": env_id,
+    "state_space": s_size,
+    "action_space": a_size,
+}
+```
+
+```python
+# Create policy and place it to the device
+cartpole_policy = Policy(
+    cartpole_hyperparameters["state_space"],
+    cartpole_hyperparameters["action_space"],
+    cartpole_hyperparameters["h_size"],
+).to(device)
+cartpole_optimizer = optim.Adam(cartpole_policy.parameters(), lr=cartpole_hyperparameters["lr"])
+```
+
+```python
+scores = reinforce(
+    cartpole_policy,
+    cartpole_optimizer,
+    cartpole_hyperparameters["n_training_episodes"],
+    cartpole_hyperparameters["max_t"],
+    cartpole_hyperparameters["gamma"],
+    100,
+)
+```
+
+## 定义评估方法📝
+- 在这里，我们定义了用于测试 Reinforce 代理的评估方法。
+
+```python
+def evaluate_agent(env, max_steps, n_eval_episodes, policy):
+    """
+    Evaluate the agent for ``n_eval_episodes`` episodes and returns average reward and std of reward.
+    :param env: The evaluation environment
+    :param n_eval_episodes: Number of episode to evaluate the agent
+    :param policy: The Reinforce agent
+    """
+    episode_rewards = []
+    for episode in range(n_eval_episodes):
+        state = env.reset()
+        step = 0
+        done = False
+        total_rewards_ep = 0
+
+        for step in range(max_steps):
+            action, _ = policy.act(state)
+            new_state, reward, done, info = env.step(action)
+            total_rewards_ep += reward
+
+            if done:
+                break
+            state = new_state
+        episode_rewards.append(total_rewards_ep)
+    mean_reward = np.mean(episode_rewards)
+    std_reward = np.std(episode_rewards)
+
+    return mean_reward, std_reward
+```
+
+## 评价我们的代理📈
+
+```python
+evaluate_agent(
+    eval_env, cartpole_hyperparameters["max_t"], cartpole_hyperparameters["n_evaluation_episodes"], cartpole_policy
+)
+```
+
+### 在 Hub 上发布我们训练好的模型 🔥
+现在我们看到训练后得到了很好的结果，我们可以用一行代码在集线器上发布训练好的模型🤗。
+
+以下是模型卡的示例：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit6/modelcard.png"/>
+
+### 推送到 Hub
+#### 不要修改此代码
+
+```python
+from huggingface_hub import HfApi, snapshot_download
+from huggingface_hub.repocard import metadata_eval_result, metadata_save
+
+from pathlib import Path
+import datetime
+import json
+import imageio
+
+import tempfile
+
+import os
+```
+
+```python
+def record_video(env, policy, out_directory, fps=30):
+    """
+    Generate a replay video of the agent
+    :param env
+    :param Qtable: Qtable of our agent
+    :param out_directory
+    :param fps: how many frame per seconds (with taxi-v3 and frozenlake-v1 we use 1)
+    """
+    images = []
+    done = False
+    state = env.reset()
+    img = env.render(mode="rgb_array")
+    images.append(img)
+    while not done:
+        # Take the action (index) that have the maximum expected future reward given that state
+        action, _ = policy.act(state)
+        state, reward, done, info = env.step(action)  # We directly put next_state = state for recording logic
+        img = env.render(mode="rgb_array")
+        images.append(img)
+    imageio.mimsave(out_directory, [np.array(img) for i, img in enumerate(images)], fps=fps)
+```
+
+```python
+def push_to_hub(repo_id,
+                model,
+                hyperparameters,
+                eval_env,
+                video_fps=30
+                ):
+  """
+  Evaluate, Generate a video and Upload a model to Hugging Face Hub.
+  This method does the complete pipeline:
+  - It evaluates the model
+  - It generates the model card
+  - It generates a replay video of the agent
+  - It pushes everything to the Hub
+
+  :param repo_id: repo_id: id of the model repository from the Hugging Face Hub
+  :param model: the pytorch model we want to save
+  :param hyperparameters: training hyperparameters
+  :param eval_env: evaluation environment
+  :param video_fps: how many frame per seconds to record our video replay
+  """
+
+  _, repo_name = repo_id.split("/")
+  api = HfApi()
+
+  # Step 1: Create the repo
+  repo_url = api.create_repo(
+        repo_id=repo_id,
+        exist_ok=True,
+  )
+
+  with tempfile.TemporaryDirectory() as tmpdirname:
+    local_directory = Path(tmpdirname)
+
+    # Step 2: Save the model
+    torch.save(model, local_directory / "model.pt")
+
+    # Step 3: Save the hyperparameters to JSON
+    with open(local_directory / "hyperparameters.json", "w") as outfile:
+      json.dump(hyperparameters, outfile)
+
+    # Step 4: Evaluate the model and build JSON
+    mean_reward, std_reward = evaluate_agent(eval_env,
+                                            hyperparameters["max_t"],
+                                            hyperparameters["n_evaluation_episodes"],
+                                            model)
+    # Get datetime
+    eval_datetime = datetime.datetime.now()
+    eval_form_datetime = eval_datetime.isoformat()
+
+    evaluate_data = {
+          "env_id": hyperparameters["env_id"],
+          "mean_reward": mean_reward,
+          "n_evaluation_episodes": hyperparameters["n_evaluation_episodes"],
+          "eval_datetime": eval_form_datetime,
+    }
+
+    # Write a JSON file
+    with open(local_directory / "results.json", "w") as outfile:
+        json.dump(evaluate_data, outfile)
+
+    # Step 5: Create the model card
+    env_name = hyperparameters["env_id"]
+
+    metadata = {}
+    metadata["tags"] = [
+          env_name,
+          "reinforce",
+          "reinforcement-learning",
+          "custom-implementation",
+          "deep-rl-class"
+      ]
+
+    # Add metrics
+    eval = metadata_eval_result(
+        model_pretty_name=repo_name,
+        task_pretty_name="reinforcement-learning",
+        task_id="reinforcement-learning",
+        metrics_pretty_name="mean_reward",
+        metrics_id="mean_reward",
+        metrics_value=f"{mean_reward:.2f} +/- {std_reward:.2f}",
+        dataset_pretty_name=env_name,
+        dataset_id=env_name,
+      )
+
+    # Merges both dictionaries
+    metadata = {**metadata, **eval}
+
+    model_card = f"""
+  # **Reinforce** Agent playing **{env_id}**
+  This is a trained model of a **Reinforce** agent playing **{env_id}** .
+  To learn to use this model and train yours check Unit 4 of the Deep Reinforcement Learning Course: https://huggingface.co/deep-rl-course/unit4/introduction
+  """
+
+    readme_path = local_directory / "README.md"
+    readme = ""
+    if readme_path.exists():
+        with readme_path.open("r", encoding="utf8") as f:
+          readme = f.read()
+    else:
+      readme = model_card
+
+    with readme_path.open("w", encoding="utf-8") as f:
+      f.write(readme)
+
+    # Save our metrics to Readme metadata
+    metadata_save(readme_path, metadata)
+
+    # Step 6: Record a video
+    video_path =  local_directory / "replay.mp4"
+    record_video(env, model, video_path, video_fps)
+
+    # Step 7. Push everything to the Hub
+    api.upload_folder(
+          repo_id=repo_id,
+          folder_path=local_directory,
+          path_in_repo=".",
+    )
+
+    print(f"Your model is pushed to the Hub. You can view your model here: {repo_url}")
+```
+
+通过使用 `push_to_hub`, **您评估、录制重播、生成您的特工模型卡并将其推送到 Hub**.
+
+这样：
+- 你可以 **展示我们的工作** 🔥
+- 你可以 **想象你的经纪人正在打球** 👀
+- 你可以 **与社区共享其他人可以使用的代理** 💾
+- 你可以 **访问排行榜🏆，查看您的代理与您的同学相比表现如何** 👉 https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard
+
+
+为了能够与社区共享您的模型，还需要遵循三个步骤：
+
+1️⃣ (如果还没有完成) 创建 HF 帐户 ➡ https://huggingface.co/join
+
+2️⃣ 登录，然后，您需要存储来自 Hugging Face 网站的身份验证令牌。
+- 创建一个新令牌 (https://huggingface.co/settings/tokens) **具有写入角色**
+
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/create-token.jpg" alt="Create HF Token">
+
+
+```python
+notebook_login()
+```
+
+如果您不想使用 Google Colab 或 Jupyter Notebook，则需要使用以下命令： `huggingface-cli login` (或 `login`)
+
+3️⃣ 我们现在准备好将我们训练有素的代理推送到🤗 Hub 🔥 使用 `package_to_hub()` 功能
+
+```python
+repo_id = ""  # TODO Define your repo id {username/Reinforce-{model-id}}
+push_to_hub(
+    repo_id,
+    cartpole_policy,  # The model we want to save
+    cartpole_hyperparameters,  # Hyperparameters
+    eval_env,  # Evaluation environment
+    video_fps=30
+)
+```
+
+现在我们测试了实现的稳健性，让我们尝试一个更复杂的环境：PixelCopter 🚁
+
+
+
+
+## 第二代理：PixelCopter 🚁
+
+### 研究 PixelCopter 环境 👀
+- [环境文档](https://pygame-learning-environment.readthedocs.io/en/latest/user/games/pixelcopter.html)
+
+
+```python
+env_id = "Pixelcopter-PLE-v0"
+env = gym.make(env_id)
+eval_env = gym.make(env_id)
+s_size = env.observation_space.shape[0]
+a_size = env.action_space.n
+```
+
+```python
+print("_____OBSERVATION SPACE_____ \n")
+print("The State Space is: ", s_size)
+print("Sample observation", env.observation_space.sample())  # Get a random observation
+```
+
+```python
+print("\n _____ACTION SPACE_____ \n")
+print("The Action Space is: ", a_size)
+print("Action Space Sample", env.action_space.sample())  # Take a random action
+```
+
+观察空间 (7) 👀:
+- 玩家 y 位置
+- 玩家速度
+- 球员到地板的距离
+- 玩家到天花板的距离
+- 下一个方块 x 到玩家的距离
+- 下一个块顶部 y 位置
+- 下一个块底部 y 位置
+
+行动空间(2) 🎮:
+- 向上 (按下加速器)
+- 什么都不做 (不要踩油门)
+
+奖励函数💰：
+- 对于它通过的每个垂直块，它都会获得 +1 的正奖励。每次达到最终状态时，它都会收到 -1 的负奖励。
+
+### 定义新政策🧠
+- 由于环境更加复杂，我们需要有更深的神经网络
+
+```python
+class Policy(nn.Module):
+    def __init__(self, s_size, a_size, h_size):
+        super(Policy, self).__init__()
+        # Define the three layers here
+
+    def forward(self, x):
+        # Define the forward process here
+        return F.softmax(x, dim=1)
+
+    def act(self, state):
+        state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        probs = self.forward(state).cpu()
+        m = Categorical(probs)
+        action = m.sample()
+        return action.item(), m.log_prob(action)
+```
+
+#### 解决方案
+
+```python
+class Policy(nn.Module):
+    def __init__(self, s_size, a_size, h_size):
+        super(Policy, self).__init__()
+        self.fc1 = nn.Linear(s_size, h_size)
+        self.fc2 = nn.Linear(h_size, h_size * 2)
+        self.fc3 = nn.Linear(h_size * 2, a_size)
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return F.softmax(x, dim=1)
+
+    def act(self, state):
+        state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        probs = self.forward(state).cpu()
+        m = Categorical(probs)
+        action = m.sample()
+        return action.item(), m.log_prob(action)
+```
+
+### 定义超参数⚙️
+- 因为这个环境比较复杂。
+- 特别是对于隐藏尺寸，我们需要更多的神经元。
+
+```python
+pixelcopter_hyperparameters = {
+    "h_size": 64,
+    "n_training_episodes": 50000,
+    "n_evaluation_episodes": 10,
+    "max_t": 10000,
+    "gamma": 0.99,
+    "lr": 1e-4,
+    "env_id": env_id,
+    "state_space": s_size,
+    "action_space": a_size,
+}
+```
+
+###  训练它
+- 我们现在准备好训练我们的代理了🔥。
+
+```python
+# Create policy and place it to the device
+# torch.manual_seed(50)
+pixelcopter_policy = Policy(
+    pixelcopter_hyperparameters["state_space"],
+    pixelcopter_hyperparameters["action_space"],
+    pixelcopter_hyperparameters["h_size"],
+).to(device)
+pixelcopter_optimizer = optim.Adam(pixelcopter_policy.parameters(), lr=pixelcopter_hyperparameters["lr"])
+```
+
+```python
+scores = reinforce(
+    pixelcopter_policy,
+    pixelcopter_optimizer,
+    pixelcopter_hyperparameters["n_training_episodes"],
+    pixelcopter_hyperparameters["max_t"],
+    pixelcopter_hyperparameters["gamma"],
+    1000,
+)
+```
+
+### 在 Hub 上发布我们训练好的模型 🔥
+
+```python
+repo_id = ""  # TODO Define your repo id {username/Reinforce-{model-id}}
+push_to_hub(
+    repo_id,
+    pixelcopter_policy,  # The model we want to save
+    pixelcopter_hyperparameters,  # Hyperparameters
+    eval_env,  # Evaluation environment
+    video_fps=30
+)
+```
+
+## 一些额外的挑战🏆
+
+最好的学习方式 **就是自己去尝试**！正如您所看到的，当前的代理表现不佳。作为第一个建议，您可以训练更多步数。但也要尝试寻找更好的参数。
+
+在 [排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard) 你会找到你的代理人。你能到达顶峰吗？
+
+以下是一些登上排行榜的想法：
+* 训练更多步数
+* 看看你的同学做了什么，尝试不同的超参数 👉 https://huggingface.co/models?other=reinforce
+* **推送您新训练的模型** 在 Hub 🔥
+* **改进更复杂环境的实施** (例如，将网络更改为卷积神经网络来处理
+框架作为观察)?
+
+________________________________________________________________________
+
+**恭喜您完成本单元**！ 有很多信息。
+并祝贺您完成本教程。您刚刚使用 PyTorch 从头开始​​编写了第一个深度强化学习代理，并在 Hub 上分享了它。
+
+不要犹豫迭代这个单元 **通过改进更复杂环境的实施** (例如，将网络更改为卷积神经网络来处理
+框架作为观察)?
+
+在下一个单元中， **我们将了解有关 Unity MLAgents 的更多信息**，通过在 Unity 环境中培训代理。这样，您就可以准备好参加 **人工智能与人工智能挑战，您将在其中训练您的代理
+在打雪仗和足球比赛中与其他特工竞争。**
+
+听起来很有趣吗？下次见！
+
+最后，我们会喜欢 **听听您对课程的看法以及我们如何改进它**。如果您有任何反馈，请👉  [填写此表格](https://forms.gle/BzKXWzLAGZESGNaE9)
+
+第五单元见！ 🔥
+
+### 不断学习，保持优秀🤗

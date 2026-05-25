@@ -1,0 +1,342 @@
+# 动手实践 [[hands-on]]
+
+
+
+      <CourseFloatingBanner classNames="absolute z-10 right-0 top-0"
+      笔记本={[
+        {label: "Google Colab", value: "https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit3/unit3.ipynb"}
+        ]}
+        AskForHelpUrl="http://hf.co/join/discord" />
+
+
+现在您已经研究了 Deep Q-Learning 背后的理论， **您已准备好训练您的 Deep Q-Learning 代理来玩 Atari 游戏**。我们将从 Space Invaders 开始，但您将能够使用任何您想要的 Atari 游戏 🔥
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit4/atari-envs.gif" alt="Environments"/>
+
+
+我们正在使用 [RL-Baselines-3 Zoo 集成](https://github.com/DLR-RM/rl-baselines3-zoo)，Deep Q-Learning 的普通版本，没有扩展，例如 Double-DQN、Dueling-DQN 或优先体验重放。
+
+另外， **如果您想在本次实践后学习自己实现 Deep Q-Learning**，你绝对应该看看 CleanRL 实现： https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/dqn_atari.py
+
+为了验证认证过程的实际操作，您需要将经过训练的模型推送到 Hub 并 **得到 >= 200 的结果**.
+
+要找到您的结果，请转到排行榜并找到您的模型， **结果 =mean_reward - 奖励标准差**
+
+**如果找不到您的型号，请转到页面底部并单击刷新按钮。**
+
+有关认证过程的更多信息，请查看此部分👉 https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process
+
+您可以在这里查看您的进度 👉 https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course
+
+
+**要开始实践，请单击 Open In Colab 按钮** 👇 :
+
+[![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit3/unit3.ipynb)
+
+# 第 3 单元：Deep Q-Learning 与 Atari 游戏 👾 使用 RL Baselines3 Zoo
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit4/thumbnail.jpg" alt="Unit 3 Thumbnail">
+
+在这次的实战中， **您将训练 Deep Q-Learning 代理** 玩 Space Invaders 使用 [RL Baselines3 Zoo](https://github.com/DLR-RM/rl-baselines3-zoo)，基于的训练框架 [Stable-Baselines3](https://stable-baselines3.readthedocs.io/en/master/) 它提供用于训练、评估代理、调整超参数、绘制结果和录制视频的脚本。
+
+我们正在使用 [RL-Baselines-3 Zoo 集成，Deep Q-Learning 的普通版本](https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html) 没有 Double-DQN、Dueling-DQN 和优先体验重放等扩展。
+
+### 🎮 环境：
+
+- [SpacesInvadersNoFrameskip-v4](https://gymnasium.farama.org/environments/atari/space_invaders/)
+
+您可以在这里查看 Space Invaders 版本之间的差异 👉 https://gymnasium.farama.org/environments/atari/space_invaders/#variants
+
+### 📚 RL-库：
+
+- [RL-基线3-Zoo](https://github.com/DLR-RM/rl-baselines3-zoo)
+
+## 本次实践的目标🏆
+
+实践结束后，您将：
+- 能够深入了解 **RL Baselines3 Zoo 的工作原理**.
+- 能够 **将您训练有素的代理和代码推送到 Hub** 带有精彩的视频回放和评估分数🔥。
+
+## 先决条件🏗️
+
+在开始实践之前，您需要：
+
+🔲 📚 **[通过阅读第 3 单元来学习 Deep Q-Learning](https://huggingface.co/deep-rl-course/unit3/introduction)**  🤗
+
+我们一直在努力改进我们的教程，所以 **如果您在本次实践中发现一些问题**，请 [在 Github Repo 上提出问题](https://github.com/huggingface/deep-rl-class/issues).
+
+# 让我们训练一个 Deep Q-Learning 代理玩 Atari' Space Invaders 👾 并将其上传到 Hub。
+
+我们强烈推荐学生 **使用 Google Colab 进行实践练习，而不是在个人计算机上运行它们**.
+
+通过使用 Google Colab， **您可以专注于学习和实验，而不必担心设置环境的技术方面**.
+
+为了验证认证过程的实际操作，您需要将经过训练的模型推送到 Hub 并 **得到 >= 200 的结果**.
+
+要找到您的结果，请转到排行榜并找到您的模型， **结果 =mean_reward - 奖励标准差**
+
+有关认证过程的更多信息，请查看此部分👉 https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process
+
+## 设置 GPU 💪
+
+- 至 **加速代理的训练，我们将使用 GPU**。为此，请转至 `Runtime > Change Runtime type`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step1.jpg" alt="GPU Step 1">
+
+- `Hardware Accelerator > GPU`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step2.jpg" alt="GPU Step 2">
+
+# 安装 RL-Baselines3 Zoo 及其依赖项 📚
+
+如果你看到 `ERROR: pip's dependency resolver does not currently take into account all the packages that are installed.` **这是正常现象，不是严重错误** 版本有冲突。但是我们需要的包已经安装了。
+
+```python
+# For now we install this update of RL-Baselines3 Zoo
+pip install git+https://github.com/DLR-RM/rl-baselines3-zoo
+```
+
+```bash
+apt-get install swig cmake ffmpeg
+```
+
+为了能够在 Gymnasium 中使用 Atari 游戏，我们需要安装 atari 软件包。并接受 rom-license 来下载 rom 文件 (游戏文件).
+
+```python
+!pip install gymnasium[atari]
+!pip install gymnasium[accept-rom-license]
+```
+
+## 创建虚拟显示🔽
+
+在实践过程中，我们需要生成一个重播视频。为此，如果你在无头机器上训练它， **我们需要一个虚拟屏幕来渲染环境** (从而记录帧).
+
+因此，以下单元格将安装库并创建并运行虚拟屏幕🖥
+
+```bash
+apt install python-opengl
+apt install ffmpeg
+apt install xvfb
+pip3 install pyvirtualdisplay
+```
+
+```python
+# Virtual display
+from pyvirtualdisplay import Display
+
+virtual_display = Display(visible=0, size=(1400, 900))
+virtual_display.start()
+```
+
+## 训练我们的 Deep Q-Learning 代理来玩 Space Invaders 👾
+
+要使用 RL-Baselines3-Zoo 训练智能体，我们只需要做两件事：
+
+1. 创建一个超参数配置文件，其中包含我们的训练超参数，称为 `dqn.yml`.
+
+这是一个模板示例：
+
+```
+SpaceInvadersNoFrameskip-v4:
+  env_wrapper:
+    - stable_baselines3.common.atari_wrappers.AtariWrapper
+  frame_stack: 4
+  policy: 'CnnPolicy'
+  n_timesteps: !!float 1e7
+  buffer_size: 100000
+  learning_rate: !!float 1e-4
+  batch_size: 32
+  learning_starts: 100000
+  target_update_interval: 1000
+  train_freq: 4
+  gradient_steps: 1
+  exploration_fraction: 0.1
+  exploration_final_eps: 0.01
+  # If True, you need to deactivate handle_timeout_termination
+  # in the replay_buffer_kwargs
+  optimize_memory_usage: False
+```
+
+在这里我们看到：
+- 我们使用 `Atari Wrapper` 对输入进行预处理 (减帧、灰度、堆叠4帧)
+- 我们使用 `CnnPolicy`，因为我们使用卷积层来处理帧
+- 我们训练它1000万 `n_timesteps`
+- 内存 (体验重播) 大小是 100000，也就是您保存用于再次训练代理的经验步骤数。
+
+💡我的建议是 **将训练时间步减少到 1M，** 在 P100 上大约需要 90 分钟。 `!nvidia-smi` 会告诉你正在使用什么 GPU。如果步数为 1000 万步，则大约需要 9 小时。我建议在您的本地计算机上运行它 (或其他地方)。只需点击： `File>Download`.
+
+在超参数优化方面，我的建议是关注这3个超参数：
+- `learning_rate`
+- `buffer_size (Experience Memory size)`
+- `batch_size`
+
+作为一个好的做法，你需要 **检查文档以了解每个超参数的作用**: https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html#parameters
+
+
+
+2. 我们开始训练并将模型保存在 `logs` 文件夹📁
+
+- 之后定义算法 `--algo`，我们保存模型后的位置 `-f` 以及超参数配置的位置 `-c`.
+
+```bash
+python -m rl_zoo3.train --algo ________ --env SpaceInvadersNoFrameskip-v4  -f _________  -c _________
+```
+
+#### 解决方案
+
+```bash
+python -m rl_zoo3.train --algo dqn  --env SpaceInvadersNoFrameskip-v4 -f logs/ -c dqn.yml
+```
+
+## 让我们评估一下我们的经纪人👀
+
+- RL-Baselines3-Zoo 提供 `enjoy.py`，一个用于评估我们的代理的 python 脚本。在大多数 RL 库中，我们将评估脚本称为 `enjoy.py`.
+- 让我们用 5000 个时间步对其进行评估 🔥
+
+```bash
+python -m rl_zoo3.enjoy  --algo dqn  --env SpaceInvadersNoFrameskip-v4  --no-render  --n-timesteps _________  --folder logs/
+```
+
+#### 解决方案
+
+```bash
+python -m rl_zoo3.enjoy  --algo dqn  --env SpaceInvadersNoFrameskip-v4  --no-render  --n-timesteps 5000  --folder logs/
+```
+
+## 在 Hub 上发布我们训练好的模型 🚀
+现在我们看到训练后得到了很好的结果，我们可以用一行代码在集线器上发布训练好的模型🤗。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/unit3/space-invaders-model.gif" alt="Space Invaders model">
+
+通过使用 `rl_zoo3.push_to_hub` **您评估、记录重播、生成代理的模型卡并将其推送到 Hub**.
+
+这样：
+- 你可以 **展示我们的工作** 🔥
+- 你可以 **想象你的经纪人正在打球** 👀
+- 你可以 **与社区分享其他人可以使用的代理** 💾
+- 你可以 **访问排行榜🏆，查看您的代理与您的同学相比表现如何** 👉  https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard
+
+为了能够与社区共享您的模型，还需要遵循三个步骤：
+
+1️⃣ (如果还没有完成) 创建 HF 帐户 ➡ https://huggingface.co/join
+
+2️⃣ 登录，然后，您需要存储来自 Hugging Face 网站的身份验证令牌。
+- 创建一个新令牌 (https://huggingface.co/settings/tokens) **具有写入角色**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/create-token.jpg" alt="Create HF Token">
+
+- 复制令牌
+- 运行下面的单元格并经过令牌
+
+```bash
+from huggingface_hub import notebook_login # To log to our Hugging Face account to be able to upload models to the Hub.
+notebook_login()
+!git config --global credential.helper store
+```
+
+如果您不想使用 Google Colab 或 Jupyter Notebook，则需要使用以下命令： `huggingface-cli login`
+
+3️⃣ 我们现在准备将训练有素的代理推向🤗 Hub 🔥
+
+让我们运行push_to_hub.py 文件将训练好的代理上传到Hub。
+
+`--repo-name `: 仓库名称
+
+`-orga`：您的 Hugging Face 用户名
+
+`-f`：训练好的模型文件夹所在的位置 (在我们的例子中 `logs`)
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/unit3/select-id.png" alt="Select Id">
+
+```bash
+python -m rl_zoo3.push_to_hub  --algo dqn  --env SpaceInvadersNoFrameskip-v4  --repo-name _____________________ -orga _____________________ -f logs/
+```
+
+#### 解决方案
+
+```bash
+python -m rl_zoo3.push_to_hub  --algo dqn  --env SpaceInvadersNoFrameskip-v4  --repo-name dqn-SpaceInvadersNoFrameskip-v4  -orga ThomasSimonini  -f logs/
+```
+
+###.
+
+恭喜 🥳 您刚刚使用 RL-Baselines-3 Zoo 训练并上传了您的第一个 Deep Q-Learning 代理。上面的脚本应该显示一个模型存储库的链接，例如 https://huggingface.co/ThomasSimonini/dqn-SpaceInvadersNoFrameskip-v4. 当您访问此链接时，您可以：
+
+- 请参阅 **您的代理的视频预览** 在右边。
+- 单击“文件和版本”可查看存储库中的所有文件。
+- 单击“在 stable-baselines3 中使用”以获取显示如何加载模型的代码片段。
+- 模型卡一张 (`README.md` 文件) 其中给出了模型和您使用的超参数的描述。
+
+在幕后，Hub 使用基于 git 的存储库 (如果您不知道 git 是什么，请不要担心)，这意味着您可以在试验和改进代理时使用新版本更新模型。
+
+**将您的代理人的结果与您的同学进行比较** 使用 [排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard) 🏆
+
+## 加载强大的训练模型 🔥
+
+- Stable-Baselines3团队上传 **Hub 上有超过 150 个训练有素的深度强化学习代理**.
+
+您可以在这里找到它们：👉 https://huggingface.co/sb3
+
+一些例子：
+- 小行星： https://huggingface.co/sb3/dqn-AsteroidsNoFrameskip-v4
+- 光束骑士： https://huggingface.co/sb3/dqn-BeamRiderNoFrameskip-v4
+- Breakout： https://huggingface.co/sb3/dqn-BreakoutNoFrameskip-v4
+- 公路跑者： https://huggingface.co/sb3/dqn-RoadRunnerNoFrameskip-v4
+
+让我们加载一个玩 Beam Rider 的代理： https://huggingface.co/sb3/dqn-BeamRiderNoFrameskip-v4
+
+1. 我们使用下载模型 `rl_zoo3.load_from_hub`，并将其放在一个我们可以调用的新文件夹中 `rl_trained`
+
+```bash
+# Download model and save it into the logs/ folder
+python -m rl_zoo3.load_from_hub --algo dqn --env BeamRiderNoFrameskip-v4 -orga sb3 -f rl_trained/
+```
+
+2. 让我们评估 5000 个时间步长的情况
+
+```bash
+python -m rl_zoo3.enjoy --algo dqn --env BeamRiderNoFrameskip-v4 -n 5000  -f rl_trained/ --no-render
+```
+
+为什么不尝试训练自己 **Deep Q-Learning 代理正在玩 BeamRiderNoFrameskip-v4？ 🏆。**
+
+如果您想尝试，请检查 https://huggingface.co/sb3/dqn-BeamRiderNoFrameskip-v4#hyperparameters **在模型卡中，您拥有经过训练的代理的超参数。**
+
+但寻找超参数可能是一项艰巨的任务。幸运的是，我们将在下一个单元中看到如何 **使用 Optuna 优化超参数 🔥。**
+
+
+## 一些额外的挑战🏆
+
+最好的学习方式 **就是自己去尝试**!
+
+在 [排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard) 你会找到你的代理人。你能到达顶峰吗？
+
+以下是您可以尝试训练代理的环境列表：
+- BeamRiderNoFrameskip-v4
+- BreakoutNoFrameskip-v4
+- EnduroNoFrameskip-v4
+- PongNoFrameskip-v4
+
+另外， **如果你想自己学习实现Deep Q-Learning**，你绝对应该看看 CleanRL 实现： https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/dqn_atari.py
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit4/atari-envs.gif" alt="Environments"/>
+
+________________________________________________________________________
+恭喜您完成本章！
+
+如果您仍然对所有这些元素感到困惑......这是完全正常的！ **这对我和所有研究 RL 的人来说都是一样的。**
+
+花点时间真正 **在继续之前掌握材料并尝试其他挑战**。掌握这些要素并拥有坚实的基础非常重要。
+
+在下一个单元中， **我们将要了解 [Optuna](https://optuna.org/)**。深度强化学习中最关键的任务之一是找到一组好的训练超参数。 Optuna 是一个可以帮助您自动化搜索的库。
+
+
+### 这是一门与你共同打造的课程👷🏿‍♀️
+
+最后，我们希望根据您的反馈不断改进和更新课程。如果您有的话，请填写此表格👉 https://forms.gle/3HgA7bEHwAmmLfwh9
+
+我们一直在努力改进我们的教程，所以 **如果您发现此笔记本存在问题**，请 [在 Github Repo 上提出问题](https://github.com/huggingface/deep-rl-class/issues).
+
+奖励单元 2 见！ 🔥
+
+### 不断学习，保持优秀🤗

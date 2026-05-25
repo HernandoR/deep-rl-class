@@ -1,0 +1,396 @@
+# 优势演员评论家 (A2C) 使用 Panda-Gym 进行机器人模拟 🤖 [[hands-on]]
+
+
+      <CourseFloatingBanner classNames="absolute z-10 right-0 top-0"
+      笔记本={[
+        {label: "Google Colab", value: "https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit6/unit6.ipynb"}
+        ]}
+        AskForHelpUrl="http://hf.co/join/discord" />
+
+
+现在您已经研究了优势演员评论家背后的理论 (A2C), **您已准备好训练您的 A2C 代理** 在机器人环境中使用 Stable-Baselines3。并训练一个：
+- 机械臂🦾移动到正确的位置。
+
+我们将使用 
+- [Panda-Gym](https://github.com/qgallouedec/panda-gym)
+
+为了验证认证过程的实际操作，您需要将两个经过训练的模型推送到 Hub 并获得以下结果：
+
+- `PandaReachDense-v3` 得到 >= -3.5 的结果。
+
+要找到您的结果， [去排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard) 并找到你的模型， **结果 =mean_reward - 奖励标准差**
+
+有关认证过程的更多信息，请查看此部分👉 https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process
+
+**要开始实践，请单击 Open In Colab 按钮** 👇 :
+
+[![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit6/unit6.ipynb)
+
+
+# 第六单元：优势演员评论家 (A2C) 使用 Panda-Gym 进行机器人模拟 🤖
+
+### 🎮 环境：
+
+- [Panda-Gym](https://github.com/qgallouedec/panda-gym)
+
+### 📚 RL-库：
+
+- [Stable-Baselines3](https://stable-baselines3.readthedocs.io/)
+
+我们一直在努力改进我们的教程，所以 **如果您发现此笔记本存在问题**，请 [在 GitHub 存储库上提出问题](https://github.com/huggingface/deep-rl-class/issues).
+
+## 本笔记本的目标🏆
+
+在笔记本的最后，您将：
+
+- 能够使用 **Panda-Gym**，环境库。
+- 能够 **使用 A2C 训练机器人**.
+- 明白为什么 **我们需要标准化输入**.
+- 能够 **将您训练有素的代理和代码推送到 Hub** 带有精彩的视频回放和评估分数🔥。
+
+## 先决条件🏗️
+
+在深入了解笔记本之前，您需要：
+
+🔲📚学习 [阅读第 6 单元的 Actor-Critic 方法](https://huggingface.co/deep-rl-course/unit6/introduction) 🤗
+
+# 让我们训练我们的第一个机器人🤖
+
+## 设置 GPU 💪
+
+- 至 **加速代理的训练，我们将使用 GPU**。为此，请转至 `Runtime > Change Runtime type`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step1.jpg" alt="GPU Step 1">
+
+- `Hardware Accelerator > GPU`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step2.jpg" alt="GPU Step 2">
+
+## 创建虚拟显示🔽
+
+在笔记本过程中，我们需要生成重播视频。为此，通过 Colab， **我们需要一个虚拟屏幕来渲染环境** (从而记录帧).
+
+以下单元格将安装库并创建并运行虚拟屏幕🖥
+
+```python
+%%capture
+!apt install python-opengl
+!apt install ffmpeg
+!apt install xvfb
+!pip3 install pyvirtualdisplay
+```
+
+```python
+# Virtual display
+from pyvirtualdisplay import Display
+
+virtual_display = Display(visible=0, size=(1400, 900))
+virtual_display.start()
+```
+
+### 安装依赖项🔽
+
+我们将安装多个：
+
+- `gymnasium`
+- `panda-gym`：包含机器人手臂环境。
+- `stable-baselines3`：SB3 深度强化学习库。
+- `huggingface_sb3`：Stable-baselines3 的附加代码，用于从 Hugging Face 🤗 Hub 加载和上传模型。
+- `huggingface_hub`：允许任何人使用 Hub 存储库的库。
+
+```bash
+!pip install stable-baselines3[extra]
+!pip install gymnasium
+!pip install huggingface_sb3
+!pip install huggingface_hub
+!pip install panda_gym
+```
+
+## 导入包📦
+
+```python
+import os
+
+import gymnasium as gym
+import panda_gym
+
+from huggingface_sb3 import load_from_hub, package_to_hub
+
+from stable_baselines3 import A2C
+from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
+from stable_baselines3.common.env_util import make_vec_env
+
+from huggingface_hub import notebook_login
+```
+
+## PandaReachDense-v3 🦾
+
+我们要训练的代理是一个需要进行控制的机械臂 (移动手臂并使用末端执行器).
+
+在机器人技术中， *末端执行器* 是位于机械臂末端的装置，旨在与环境交互。
+
+在 `PandaReach`，机器人必须将其末端执行器放置在目标位置 (绿球).
+
+我们将使用此环境的密集版本。这意味着我们将得到一个 *密集奖励函数* 那个 **将在每个时间步提供奖励** (代理越接近完成任务，奖励就越高)。与 *稀疏奖励函数* 哪里的环境**当且仅当任务完成时才返回奖励**.
+
+另外，我们将使用 *末端执行器位移控制*，这意味着 **动作对应于末端执行器的位移**。我们不控制每个关节的单独运动 (联合控制).
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/robotics.jpg"  alt="Robotics"/>
+
+这样 **训练会更容易**.
+
+### 创造环境
+
+#### 环境🎮
+
+在 `PandaReachDense-v3` 机械臂必须将其末端执行器放置在目标位置 (绿球).
+
+```python
+env_id = "PandaReachDense-v3"
+
+# Create the env
+env = gym.make(env_id)
+
+# Get the state space and action space
+s_size = env.observation_space.shape
+a_size = env.action_space
+```
+
+```python
+print("_____OBSERVATION SPACE_____ \n")
+print("The State Space is: ", s_size)
+print("Sample observation", env.observation_space.sample()) # Get a random observation
+```
+
+观察空间 **是一个包含 3 个不同元素的字典**:
+
+- `achieved_goal`: (x,y,z) 目标的位置。
+- `desired_goal`: (x,y,z) 目标位置与当前物体位置之间的距离。
+- `observation`: 位置 (x,y,z) 和末端执行器的速度 (vx、vy、vz).
+
+鉴于它是一本字典作为观察， **我们需要使用 MultiInputPolicy 策略而不是 MlpPolicy**.
+
+```python
+print("\n _____ACTION SPACE_____ \n")
+print("The Action Space is: ", a_size)
+print("Action Space Sample", env.action_space.sample()) # Take a random action
+```
+
+动作空间是一个具有 3 个值的向量：
+- 控制 x、y、z 运动
+
+
+### 规范观察和奖励
+
+强化学习的一个好的实践是 [标准化输入特征](https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html).
+
+为此，有一个包装器将计算输入特征的运行平均值和标准差。
+
+我们还通过添加相同的包装器来标准化奖励 `norm_reward = True`
+
+[您应该检查文档来填写此单元格](https://stable-baselines3.readthedocs.io/en/master/guide/vec_envs.html#vecnormalize)
+
+```python
+env = make_vec_env(env_id, n_envs=4)
+
+# Adding this wrapper to normalize the observation and the reward
+env = # TODO: Add the wrapper
+```
+
+#### 解决方案
+
+```python
+env = make_vec_env(env_id, n_envs=4)
+
+env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.)
+```
+
+### 创建 A2C 模型 🤖
+
+有关使用 StableBaselines3 检查 A2C 实现的更多信息： https://stable-baselines3.readthedocs.io/en/master/modules/a2c.html#notes
+
+为了找到最佳参数，我检查了 [Stable-Baselines3团队官方培训的代理](https://huggingface.co/sb3).
+
+```python
+model = # Create the A2C model and try to find the best parameters
+```
+
+#### 解决方案
+
+```python
+model = A2C(policy = "MultiInputPolicy",
+            env = env,
+            verbose=1)
+```
+
+### 训练 A2C 代理 🏃
+
+- 让我们训练我们的代理 1,000,000 个时间步，不要忘记在 Colab 上使用 GPU。大约需要 25-40 分钟
+
+```python
+model.learn(1_000_000)
+```
+
+```python
+# Save the model and  VecNormalize statistics when saving the agent
+model.save("a2c-PandaReachDense-v3")
+env.save("vec_normalize.pkl")
+```
+
+### 评估代理📈
+
+- 现在我们的代理已经接受培训了，我们需要 **检查其性能**.
+- Stable-Baselines3 提供了一种方法来做到这一点： `evaluate_policy`
+
+```python
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
+
+# Load the saved statistics
+eval_env = DummyVecEnv([lambda: gym.make("PandaReachDense-v3")])
+eval_env = VecNormalize.load("vec_normalize.pkl", eval_env)
+
+# We need to override the render_mode
+eval_env.render_mode = "rgb_array"
+
+#  do not update them at test time
+eval_env.training = False
+# reward normalization is not needed at test time
+eval_env.norm_reward = False
+
+# Load the agent
+model = A2C.load("a2c-PandaReachDense-v3")
+
+mean_reward, std_reward = evaluate_policy(model, eval_env)
+
+print(f"Mean reward = {mean_reward:.2f} +/- {std_reward:.2f}")
+```
+### 在 Hub 上发布您训练好的模型 🔥
+
+现在我们看到训练后得到了很好的结果，我们可以用一行代码在 Hub 上发布训练好的模型。
+
+📚 库文档 👉 https://github.com/huggingface/huggingface_sb3/tree/main#hugging-face--x-stable-baselines3-v20
+
+通过使用 `package_to_hub`，正如我们在前面的单元中已经提到的， **您评估、记录重播、生成代理的模型卡并将其推送到 Hub**.
+
+这样：
+- 你可以 **展示我们的工作** 🔥
+- 你可以 **想象你的经纪人正在打球** 👀
+- 你可以 **与社区分享其他人可以使用的代理** 💾
+- 你可以 **访问排行榜🏆，查看您的代理与您的同学相比表现如何** 👉 https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard
+
+为了能够与社区共享您的模型，还需要遵循三个步骤：
+
+1️⃣ (如果还没有完成) 创建 HF 帐户 ➡ https://huggingface.co/join
+
+2️⃣ 登录，然后，您需要存储来自 Hugging Face 网站的身份验证令牌。
+- 创建一个新令牌 (https://huggingface.co/settings/tokens) **具有写入角色**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/create-token.jpg" alt="Create HF Token">
+
+- 复制令牌
+- 运行下面的单元格并粘贴令牌
+
+```python
+notebook_login()
+!git config --global credential.helper store
+```
+如果您不想使用 Google Colab 或 Jupyter Notebook，则需要使用以下命令： `huggingface-cli login`
+
+3️⃣ 我们现在准备好将我们训练有素的代理推送到🤗 Hub 🔥 使用 `package_to_hub()` 功能。
+对于这样的环境， **运行该单元大约需要 10 分钟**
+
+```python
+from huggingface_sb3 import package_to_hub
+
+package_to_hub(
+    model=model,
+    model_name=f"a2c-{env_id}",
+    model_architecture="A2C",
+    env_id=env_id,
+    eval_env=eval_env,
+    repo_id=f"ThomasSimonini/a2c-{env_id}", # Change the username
+    commit_message="Initial commit",
+)
+```
+
+## 一些额外的挑战🏆
+
+最好的学习方式 **就是自己去尝试**！为什么不尝试  `PandaPickAndPlace-v3`?
+
+如果你想尝试 panda-gym 的更高级任务，你需要检查使用 **TQC 或 SAC** (适合机器人任务的样本效率更高的算法)。在真正的机器人技术中，您将使用样本效率更高的算法，原因很简单：与模拟相反 **如果你的机械臂移动太多，你就有折断它的风险**.
+
+PandaPickAndPlace-v1 (本模型使用v1版本环境): https://huggingface.co/sb3/tqc-PandaPickAndPlace-v1
+
+请随时查看 panda-gym 文档： https://panda-gym.readthedocs.io/en/latest/usage/train_with_sb3.html
+
+我们为您提供培训另一名代理的步骤 (可选的):
+
+1. 定义名为“PandaPickAndPlace-v3”的环境
+2. 创建矢量化环境
+3. 添加包装器以标准化观察和奖励。 [检查文档](https://stable-baselines3.readthedocs.io/en/master/guide/vec_envs.html#vecnormalize)
+4. 创建 A2C 模型 (不要忘记 verbose=1 打印训练日志).
+5. 训练 1M 时间步长
+6. 保存代理时保存模型和 VecNormalize 统计数据
+7. 评估您的代理人
+8. 在 Hub 🔥 上发布您经过训练的模型 `package_to_hub`
+
+
+### 解决方案 (可选的)
+
+```python
+# 1 - 2
+env_id = "PandaPickAndPlace-v3"
+env = make_vec_env(env_id, n_envs=4)
+
+# 3
+env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.)
+
+# 4
+model = A2C(policy = "MultiInputPolicy",
+            env = env,
+            verbose=1)
+# 5
+model.learn(1_000_000)
+```
+
+```python
+# 6
+model_name = "a2c-PandaPickAndPlace-v3";
+model.save(model_name)
+env.save("vec_normalize.pkl")
+
+# 7
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
+
+# Load the saved statistics
+eval_env = DummyVecEnv([lambda: gym.make("PandaPickAndPlace-v3")])
+eval_env = VecNormalize.load("vec_normalize.pkl", eval_env)
+
+#  do not update them at test time
+eval_env.training = False
+# reward normalization is not needed at test time
+eval_env.norm_reward = False
+
+# Load the agent
+model = A2C.load(model_name)
+
+mean_reward, std_reward = evaluate_policy(model, eval_env)
+
+print(f"Mean reward = {mean_reward:.2f} +/- {std_reward:.2f}")
+
+# 8
+package_to_hub(
+    model=model,
+    model_name=f"a2c-{env_id}",
+    model_architecture="A2C",
+    env_id=env_id,
+    eval_env=eval_env,
+    repo_id=f"ThomasSimonini/a2c-{env_id}", # TODO: Change the username
+    commit_message="Initial commit",
+)
+```
+
+第七单元见！ 🔥
+
+## 不断学习，保持优秀🤗

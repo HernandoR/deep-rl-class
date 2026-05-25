@@ -1,0 +1,50 @@
+# RLHF
+
+从人类反馈中强化学习 (RLHF) 是一个 **将人类数据标签集成到基于 RL 的优化过程中的方法**.
+其动机是 **模拟人类偏好的挑战**.
+
+对于许多问题，即使你可以尝试写出一个理想的方程式，人们的偏好也是不同的。
+
+更新模型 **基于测量数据是尝试缓解这些人类固有的机器学习问题的一种途径**.
+
+## 开始了解 RLHF
+
+要开始了解 RLHF：
+
+1. 阅读此介绍： [从人类反馈中说明强化学习 (RLHF)](https://huggingface.co/blog/rlhf).
+
+2. 观看我们几周前录制的现场直播，其中 Nathan 介绍了根据人类反馈进行强化学习的基础知识 (RLHF) 以及如何使用该技术来支持 ChatGPT 等最先进的 ML 工具。
+大部分讨论都是对互连机器学习模型的概述。它涵盖了自然语言处理和 RL 的基础知识以及 RLHF 如何在大型语言模型上使用。然后，我们以 RLHF 中的开放性问题作为结束。
+
+<Youtube id="2MBJOuVq380" />
+
+3. 阅读有关此主题的其他博客，例如 [封闭 API 与开源继续：RLHF、ChatGPT、数据护城河](https://robotic.substack.com/p/rlhf-chatgpt-data-moats)。如果还有您喜欢的，请告诉我们！
+
+
+## 附加读物
+
+*请注意，这是从上面的说明 RLHF 博客文章复制的*.
+以下是迄今为止 RLHF 上最流行的论文的列表。最近随着 DeepRL 的出现，该领域得到了普及 (2017年左右) 并已发展成为对许多大型科技公司的法学硕士应用的更广泛的研究。
+以下是关于 RLHF 的一些早于 LM 焦点的论文：
+- [TAMER：通过评估强化手动训练智能体](https://www.cs.utexas.edu/~pstone/Papers/bib2html-links/ICDL08-knox.pdf) (诺克斯和斯通 2008)：提出了一种学习代理，其中人类提供迭代采取的动作的分数来学习奖励模型。
+- [从政策相关的人类反馈中进行交互式学习](http://proceedings.mlr.press/v70/macglashan17a/macglashan17a.pdf) (麦克格拉森等人。 2017年)：提出了一种演员评论家算法 COACH，其中人类反馈 (积极和消极) 用于调整优势函数。
+- [根据人类偏好进行深度强化学习](https://proceedings.neurips.cc/paper/2017/hash/d5e2c0adad503c91f91df240d0cd4e49-Abstract.html) (克里斯蒂安诺等人。 2017年)：RLHF 应用于 Atari 轨迹之间的首选项。
+- [Deep TAMER：高维状态空间中的交互式智能体塑造](https://ojs.aaai.org/index.php/AAAI/article/view/11485) (沃内尔等人。 2018年)：扩展了 TAMER 框架，其中使用深度神经网络对奖励预测进行建模。
+
+以下是越来越多的论文的快照，展示了 RLHF 在 LM 方面的性能：
+- [根据人类偏好微调语言模型](https://arxiv.org/abs/1909.08593) (齐格拉尔等人。 2019年)：一篇早期论文，研究奖励学习对四个特定任务的影响。
+- [学习根据人类反馈进行总结](https://proceedings.neurips.cc/paper/2020/hash/1f89885d556929e98d3ef9b86448f951-Abstract.html) (斯蒂农等人，2020)：RLHF应用于摘要文本的任务。另外， [通过人类反馈递归总结书籍](https://arxiv.org/abs/2109.10862) (OpenAI 对齐团队 2021)，遵循工作总结书籍。
+- [WebGPT：带有人工反馈的浏览器辅助问答](https://arxiv.org/abs/2112.09332) (OpenAI, 2021)：使用 RLHF 训练代理浏览网络。
+- 指导GPT： [训练语言模型遵循人类反馈的指令](https://arxiv.org/abs/2203.02155) (OpenAI 对齐团队 2022)：RLHF应用于通用语言模型 [[博客文章](https://openai.com/blog/instruction-following/) 关于指导GPT].
+- Gopher 引用: [教授语言模型以支持带有经过验证的引用的答案](https://www.deepmind.com/publications/gophercite-teaching-language-models-to-support-answers-with-verified-quotes) (梅尼克等人。 2022年)：使用 RLHF 训练 LM 以返回带有特定引用的答案。
+- 麻雀： [通过有针对性的人类判断来改善对话代理的一致性](https://arxiv.org/abs/2209.14375) (格莱泽等人。 2022年)：使用 RLHF 微调对话代理
+- [ChatGPT：优化对话语言模型](https://openai.com/blog/chatgpt/) (OpenAI 2022)：使用 RLHF 训练 LM，使其适合用作通用聊天机器人。
+- [奖励模型过度优化的缩放法则](https://arxiv.org/abs/2210.10760) (高等人。 2022年)：研究 RLHF 中学习偏好模型的缩放特性。
+- [通过人类反馈的强化学习来训练一个有用且无害的助手](https://arxiv.org/abs/2204.05862) (人择，2022)：使用 RLHF 培训 LM 助手的详细文档。
+- [减少危害的红队语言模型：方法、扩展行为和经验教训](https://arxiv.org/abs/2209.07858) (甘古利等人。 2022年)：详细记录了“发现、衡量和尝试减少 [语言模型] 潜在有害的输出。”
+- [使用强化学习的开放式对话中的动态规划](https://arxiv.org/abs/2208.02294) (科恩等人。 2022年)：使用 RL 来增强开放式对话代理的对话技巧。
+- [是强化学习 (不) 自然语言处理？：自然语言策略优化的基准、基线和构建模块](https://arxiv.org/abs/2210.01241) (Ramamurthy 和 Ammanabrolu 等人。 2022年)：讨论RLHF中开源工具的设计空间，并提出新算法NLPO (自然语言策略优化) 作为 PPO 的替代品。
+
+## 作者
+
+本节的作者是 <a href="https://twitter.com/natolambert"> 内森·兰伯特 </a>

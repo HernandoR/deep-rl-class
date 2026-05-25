@@ -1,0 +1,23 @@
+# 简介 [[introduction]]
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/thumbnail.png" alt="Unit 8"/>
+
+在第 6 单元中，我们了解了 Advantage Actor Critic (A2C)，一种结合了基于价值和基于策略的方法的混合架构，有助于通过减少方差来稳定训练：
+
+- *演员* 控制 **我们的代理人的行为方式** (基于策略的方法).
+- *批评家* 衡量 **所采取的行动有多好** (基于价值的方法).
+
+今天我们来学习一下近端策略优化 (PPO)，一个架构 **通过避免太大的策略更新来提高代理的训练稳定性**。为此，我们使用一个比率来指示当前政策和旧政策之间的差异，并将该比率限制在特定范围内 \\( [1 - \epsilon, 1 + \epsilon] \\) .
+
+这样做将确保 **我们的政策更新不会太大，训练也比较稳定。**
+
+本单元分为两部分：
+- 在第一部分中，您将学习 PPO 背后的理论，并使用以下命令从头开始编写 PPO 代理： [CleanRL](https://github.com/vwxyzjn/cleanrl) 实施。要测试其稳健性，您将使用 LunarLander-v2。 LunarLander-v2 **是您开始本课程时使用的第一个环境**。那时，您不知道 PPO 是如何工作的，而现在， **您可以从头开始编码并训练它。这是多么不可思议啊🤩**.
+- 在第二部分中，我们将通过使用更深入地了解 PPO 优化 [sample-factory](https://samplefactory.dev/) 并训练一个代理玩 vizdoom (Doom 的开源版本).
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit10/environments.png" alt="Environment"/>
+<figcaption>这些是您将用于训练代理的环境： VizDoom 环境</figcaption>
+</figure>
+
+听起来令人兴奋吗？让我们开始吧！ 🚀

@@ -1,0 +1,90 @@
+# 解决 RL 问题的两种主要方法 [[two-methods]]
+
+<Tip>
+现在我们学习了RL框架，那么我们如何解决RL问题呢？
+</Tip>
+
+换句话说，我们如何构建一个 RL 代理，它可以 **选择能够最大化预期累积奖励的行动？**
+
+## 策略 π：代理的大脑 [[policy]]
+
+政策 **π** 是 **我们代理的大脑**，这个函数告诉我们什么 **鉴于我们所处的状态要采取的行动。** 所以它 **定义代理的行为** 在给定的时间。
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/policy_1.jpg" alt="Policy" />
+<figcaption>将政策视为我们代理的大脑，该功能将告诉我们在给定状态下要采取的行动</figcaption>
+</figure>
+
+本政策 **是我们要学习的函数**，我们的目标是找到最优策略 π\*，该政策 **最大化预期回报** 当代理人按照它行事时。我们发现这个 π\* **通过培训。**
+
+有两种方法可以训练我们的代理找到最优策略 π\*:
+
+- **直接，** 通过教代理学习哪些 **采取的行动，** 鉴于当前状态： **基于政策的方法。**
+- 间接地， **教智能体了解哪种状态更有价值** 然后采取行动 **导致更有价值的状态**：基于价值的方法。
+
+## 基于策略的方法 [[policy-based]]
+
+在基于策略的方法中， **我们直接学习策略函数。**
+
+该函数将定义从每个状态到最佳对应动作的映射。或者，它可以定义 **该状态下可能采取的行动集合的概率分布。**
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/policy_2.jpg" alt="Policy" />
+<figcaption>正如我们在这里看到的，该政策 (确定性的) <b>直接指示每个步骤要采取的操作。</b></figcaption>
+</figure>
+
+
+我们有两种类型的政策：
+
+
+- *确定性*：给定状态的政策 **将始终返回相同的操作。**
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/policy_3.jpg" alt="Policy"/>
+<figcaption>行动=政策(状态)</figcaption>
+</figure>
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/policy_4.jpg" alt="Policy" width="100%"/>
+
+- *随机指标*：输出 **动作的概率分布。**
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/policy_5.jpg" alt="Policy"/>
+<figcaption>政策(行动|状态) = 给定当前状态的一组动作的概率分布</figcaption>
+</figure>
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/policy-based.png" alt="Policy Based"/>
+<figcaption>给定初始状态，我们的随机策略将输出该状态下可能采取的行动的概率分布。</figcaption>
+</figure>
+
+
+如果我们回顾一下：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/pbm_1.jpg" alt="Pbm recap" width="100%" />
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/pbm_2.jpg" alt="Pbm recap" width="100%" />
+
+
+## 基于价值的方法 [[value-based]]
+
+在基于价值的方法中，我们不是学习策略函数，而是 **学习价值函数** 将状态映射到期望值 **处于那种状态。**
+
+状态的价值是 **预期折现回报** 代理可以得到如果 **从该状态开始，然后根据我们的策略进行操作。**
+
+“按照我们的政策行事”只是意味着我们的政策是 **“去价值最高的状态”。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/value_1.jpg" alt="Value based RL" width="100%" />
+
+在这里我们看到我们的价值函数 **为每个可能的状态定义值。**
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/value_2.jpg" alt="Value based RL"/>
+<figcaption>由于我们的价值函数，我们的策略在每一步都会选择价值函数定义的最大值的状态：-7，然后是 -6，然后是 -5 (等等) 达到目标。</figcaption>
+</figure>
+
+由于我们的价值函数，我们的策略在每一步都会选择价值函数定义的最大值的状态：-7，然后是 -6，然后是 -5 (等等) 达到目标。
+
+如果我们回顾一下：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/vbm_1.jpg" alt="Vbm recap" width="100%" />
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/vbm_2.jpg" alt="Vbm recap" width="100%" />

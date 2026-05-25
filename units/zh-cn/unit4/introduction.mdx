@@ -1,0 +1,24 @@
+# 简介 [[introduction]]
+
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit6/thumbnail.png" alt="thumbnail"/>
+
+在上一个单元中，我们学习了Deep Q-Learning。在这种基于价值的深度强化学习算法中，我们 **使用深度神经网络来近似某个状态下每个可能动作的不同 Q 值。**
+
+从课程开始以来，我们只学习基于价值的方法， **我们估计价值函数作为寻找最优策略的中间步骤。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/link-value-policy.jpg" alt="Link value policy" />
+
+在基于价值的方法中，政策 ** \(π\) 仅因行动价值估计而存在，因为政策只是一个函数** (例如，贪婪策略) 这将选择给定状态下具有最高值的操作。
+
+使用基于策略的方法，我们希望直接优化策略 **无需学习价值函数的中间步骤。**
+
+所以今天， **我们将学习基于策略的方法并研究这些方法的一个子集，称为策略梯度**。然后我们将实现我们的第一个策略梯度算法，称为蒙特卡罗 **强化** 使用 PyTorch 从头开始。
+然后，我们将使用 CartPole-v1 和 PixelCopter 环境测试其稳健性。
+
+然后，您将能够针对更高级的环境迭代和改进此实现。
+
+<figure class="image table text-center m-0 w-full">
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit6/envs.gif" alt="Environments"/>
+</figure>
+
+让我们开始吧！

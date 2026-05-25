@@ -1,0 +1,31 @@
+# Decision Transformers
+
+Decision Transformer 型号由 [“Decision Transformer：通过序列建模进行强化学习”，作者：Chen L. 等人](https://arxiv.org/abs/2106.01345)。它将强化学习抽象为条件序列建模问题。
+
+主要思想是，不是使用 RL 方法训练策略（例如拟合价值函数），而是告诉我们采取什么行动来最大化回报 (累积奖励), **我们使用序列建模算法 (变压器) 给定一个期望的回报，过去的状态和行动，将产生未来的行动来实现这个期望的回报**.
+它是一个自回归模型，以期望回报、过去的状态和行动为条件，以生成实现期望回报的未来行动。
+
+这是强化学习范式的彻底转变，因为我们使用生成轨迹建模 (对状态、动作和奖励序列的联合分布进行建模) 取代传统的RL算法。这意味着在 Decision Transformers 中，我们不会最大化回报，而是生成一系列未来行动来实现期望的回报。
+
+🤗 Transformers 团队将离线强化学习方法 Decision Transformer 以及 Hugging Face Hub 集成到库中。
+
+## 了解 Decision Transformers
+
+要了解有关 Decision Transformers 的更多信息，您应该阅读我们撰写的有关它的博文 [在Hugging Face上介绍Decision Transformers](https://huggingface.co/blog/decision-transformers)
+
+## 训练你的第一个 Decision Transformers
+
+现在您已经了解了 Decision Transformers 的工作原理 [在Hugging Face上介绍Decision Transformers](https://huggingface.co/blog/decision-transformers)，您已准备好学习从头开始训练您的第一个离线 Decision Transformer 模型以进行半猎豹奔跑。
+
+从这里开始教程👉 https://huggingface.co/blog/train-decision-transformers
+
+## 进一步阅读
+
+如需了解更多信息，我们建议您查看以下资源：
+
+- [Decision Transformer：通过序列建模进行强化学习](https://arxiv.org/abs/2106.01345)
+- [在线 Decision Transformer](https://arxiv.org/abs/2202.05607)
+
+## 作者
+
+本节的作者是 <a href="https://twitter.com/edwardbeeching">爱德华·比钦</a>

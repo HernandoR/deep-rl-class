@@ -1,0 +1,69 @@
+# 引入截断代理目标函数
+## 回顾：政策目标函数
+
+让我们记住 Reinforce 中优化的目标是什么：
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/lpg.jpg" alt="Reinforce"/>
+
+这个想法是通过对该函数采取梯度上升步骤 (相当于对该函数的负数进行梯度下降)，我们会 **推动我们的代理采取能够带来更高奖励的行动，并避免有害的行动。**
+
+然而，问题来自于步长：
+- 太小了， **训练过程太慢**
+- 太高了， **训练中有太多的变化**
+
+对于 PPO，我们的想法是用一个新的目标函数（称为 *截断代理目标函数* 那个 **将使用剪辑将政策变化限制在小范围内。**
+
+这个新功能 **旨在避免破坏性的大权重更新** :
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/ppo-surrogate.jpg" alt="PPO surrogate function"/>
+
+让我们研究每个部分以了解它是如何工作的。
+
+## 比率函数
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/ratio1.jpg" alt="Ratio"/>
+
+该比率计算如下：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/ratio2.jpg" alt="Ratio"/>
+
+这是采取行动的概率 \\( a_t \\) 在状态\\( s_t \\)在当前策略中，除以与先前策略相同的值。
+
+正如我们所看到的， \\( r_t(\theta) \\) 表示当前策略和旧策略之间的概率比：
+
+- 如果 \\( r_t(\theta) > 1 \\), 的 **行动 \\( a_t \\) 在状态 \\( s_t \\) 与旧政策相比，当前政策更有可能出现这种情况。**
+- 如果 \\( r_t(\theta) \\) 介于 0 和 1 之间，则 **与旧政策相比，当前政策采取行动的可能性较小**.
+
+所以这个概率比是 **估计旧政策和当前政策之间差异的简单方法。**
+
+## 裁剪代理目标函数的未裁剪部分
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/unclipped1.jpg" alt="PPO"/>
+
+这个比例 **可以代替我们在策略目标函数中使用的对数概率**。这给了我们新目标函数的左边部分：将比率乘以优势。
+<figure class="image table text-center m-0 w-full">
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/unclipped2.jpg" alt="PPO"/>
+  <figcaption><a href="https://arxiv.org/pdf/1707.06347.pdf">近端策略优化算法</a></figcaption>
+</figure>
+
+然而，在没有限制的情况下，如果我们当前的政策比以前的政策更有可能采取行动， **这将导致重大的政策梯度步骤** 因此，一个 **政策更新过多。**
+
+## 裁剪代理目标函数的裁剪部分
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/clipped.jpg" alt="PPO"/>
+
+因此，我们需要通过惩罚导致比率远离 1 的变化来约束该目标函数 (在论文中，该比率只能在 0.8 到 1.2 之间变化).
+
+**通过削减比率，我们确保不会有太大的政策更新，因为当前政策不会与旧政策有太大差异。**
+
+为此，我们有两种解决方案：
+
+- *TRPO (信任域策略优化)* 在目标函数之外使用KL散度约束来约束策略更新。但这个方法 **实现起来很复杂，需要更多的计算时间。**
+- *PPO* 直接在目标函数中剪辑概率比 **裁剪代理目标函数。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/clipped.jpg" alt="PPO"/>
+
+这个剪辑的部分是一个版本，其中 \\( r_t(\theta) \\) 被夹在之间  \\( [1 - \epsilon, 1 + \epsilon] \\).
+
+通过裁剪代理目标函数，我们有两种概率比，一种是非裁剪的，另一种是范围在以下范围内的裁剪的：  \\( [1 - \epsilon, 1 + \epsilon] \\)，epsilon是一个超参数，帮助我们定义这个剪辑范围 (在报纸上  \\( \epsilon = 0.2 \\).).
+
+然后，我们取裁剪目标和非裁剪目标的最小值， **所以最终目标是一个下限 (悲观界限) 未裁剪的目标。**
+
+取剪裁和非剪裁目标均值的最小值 **我们将根据比率和优势情况选择裁剪或非裁剪目标**.

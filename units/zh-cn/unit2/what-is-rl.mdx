@@ -1,0 +1,25 @@
+# 什么是 RL？简短回顾 [[what-is-rl]]
+
+在RL中，我们构建了一个代理，可以 **做出明智的决定**。例如，一个代理 **学习玩电子游戏。** 或者是贸易代理 **学会最大化其利益** 通过决定 **买入什么股票以及何时卖出。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/rl-process.jpg" alt="RL process"/>
+
+
+为了做出明智的决策，我们的代理将通过以下方式从环境中学习 **通过反复试验与之互动** 并获得奖励 (积极或消极) **作为独特的反馈。**
+
+它的目标 **是最大化其预期累积奖励** (因为奖励假设).
+
+**代理的决策过程称为策略 π：** 给定一个状态，策略将输出一个动作或动作的概率分布。也就是说，根据对环境的观察，政策将提供行动 (或每个动作的多个概率) 代理应该采取的。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/policy.jpg" alt="Policy"/>
+
+**我们的目标是找到最优策略 π* **又名，一种导致最佳预期累积奖励的策略。
+
+并找到这个最优策略 (因此解决了 RL 问题)，那里 **RL 方法有两种主要类型**:
+
+- *基于政策的方法*: **直接训练策略** 了解在给定状态下要采取哪些操作。
+- *基于价值的方法*: **训练价值函数** 学习 **哪个状态更有价值** 并使用这个值函数 **采取导致该结果的行动。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/two-approaches.jpg" alt="Two RL approaches"/>
+
+而在这个单元里， **我们将更深入地研究基于价值的方法。**

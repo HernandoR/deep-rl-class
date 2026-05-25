@@ -1,0 +1,39 @@
+# Pyramid 环境
+
+此环境中的目标是训练我们的代理 **获得Pyramid 顶部的金砖。为此，它需要按下一个按钮来生成 Pyramid，导航到 Pyramid，将其打倒，然后移动到顶部的金砖**.
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/pyramids.png" alt="Pyramids Environment"/>
+
+
+## 奖励函数
+
+奖励函数为：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/pyramids-reward.png" alt="Pyramids Environment"/>
+
+就代码而言，它看起来像这样
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/pyramids-reward-code.png" alt="Pyramids Reward"/>
+
+为了训练这个新代理寻找该按钮，然后摧毁 Pyramid，我们将使用两种奖励的组合：
+
+- 的 *外在的一* 环境赋予的 (上图).
+- 但同时也是一个 *内在的* 一个叫 **好奇心**。这第二次将 **促使我们的智能体保持好奇心，或者换句话说，更好地探索其环境**.
+
+如果您想了解更多关于好奇心的信息，请阅读下一节 (可选的) 将解释基础知识。
+
+## 观察空间
+
+在观察方面，我们 **使用 148 个光线投射，每个光线投射都可以检测物体** (开关、砖块、金砖和墙壁。)
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/pyramids_raycasts.png"/>
+
+我们还使用一个 **指示开关状态的布尔变量** (我们是否打开或关闭了生成 Pyramid 的开关) 和一个向量 **包含代理的速度**.
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/pyramids-obs-code.png" alt="Pyramids obs code"/>
+
+
+## 行动空间
+
+动作空间为 **离散的** 有四种可能的行动：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/pyramids-action.png" alt="Pyramids Environment"/>

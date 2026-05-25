@@ -1,0 +1,27 @@
+# (可选) 如何自定义环境
+
+如果您想自定义游戏关卡，请打开关卡场景 `res://scenes/level.tscn`，然后打开 `res://scenes/modules/` Godot 文件系统中的文件夹：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit13/level_scene.jpg" alt="level scene"/>
+
+该关卡包含 3 个使用模块、机器人和一些附加碰撞器制成的房间，这些碰撞器阻止了通过爬上第一个房间的墙壁并以这种方式到达钥匙来完成关卡的能力。通过将模块添加到场景中，您可以添加新的房间和物品。
+
+如果单击关键节点 (它在 `Room3`，你也可以搜索一下)，然后单击 `Node > Signals`，你会看到 `collected` 信号连接到机器人和胸部。我们用它来跟踪机器人是否已收集到钥匙，并解锁箱子。相同的系统适用于使用杠杆激活楼梯，如果您添加更多杠杆/楼梯/钥匙，您可以使用信号连接它们。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit13/level_signals.jpg" alt="level signals"/>
+
+如果你切换到 `Groups`，你会看到密钥是`resetable`团体。在同一组中，我们有木筏、杠杆、箱子、玩家，并且可以添加剧集重置时需要重置的任何节点。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit13/resetables_group.jpg" alt="resetables group"/>
+
+为了做到这一点，其中的每个对象 `resetable` 集团还需要实施 `reset()` 方法，负责重置该对象。
+
+因为我们有多个关卡场景实例用于训练，所以我们不会重置所有实例 `resetables`，但仅限于同一场景内的那些。在 `level_manager.gd`，我们有一个方法 `reset_all_resetables()` 它负责处理这个问题，并且在需要重置时由机器人脚本调用。
+
+更改关卡大小后，更新 `level_size` 变量在 `robot_ai_controller.gd` 也是需要的。为此，只需粗略测量该级别的最长尺寸，然后更新变量即可。
+
+如果您更改需要跟踪的对象的数量 `AIController` (杠杆、筏等)，您将需要更新脚本中的相关代码，包括这些对象的导出属性，然后将它们连接到 `AIController` 在关卡场景中：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit13/ai_controller_inspector_properties.jpg" alt="ai controller inspector properties"/>
+
+此后，您可能还需要更新 `AIController` 在演示录音场景中也是如此。

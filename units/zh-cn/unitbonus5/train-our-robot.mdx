@@ -1,0 +1,53 @@
+# 训练我们的机器人
+
+<Tip>
+为了开始训练，我们首先需要安装 <a href="https://imitation.readthedocs.io/en/latest/getting-started/installation.html">模仿</a> 使用以下命令将库放在安装 Godot RL Agents 的同一 venv / conda env 中： <code>pip安装模仿</code>
+</Tip>
+
+### 下载副本 [模仿学习](https://github.com/edbeeching/godot_rl_agents/blob/main/examples/sb3_imitation.py) 来自 Godot RL 存储库的脚本。
+
+### 使用以下参数运行训练：
+
+```python
+sb3_imitation.py --env_path="path_to_ILTutorial_executable" --bc_epochs=100 --gail_timesteps=1450000 --demo_files "path_to_expert_demos.json" --n_parallel=4 --speedup=20 --onnx_export_path=model.onnx --experiment_name=ILTutorial
+```
+
+**将环境路径设置为导出的游戏，并将演示文件路径设置为录制的演示。如果您有多个演示文件，请在它们之间添加空格，例如 `--demo_files demos.json demos2.json`.**
+
+您还可以设置大量的时间步长 `--gail_timesteps` 然后手动停止训练 `CTRL+C`。当奖励开始接近3时，我使用这种方法停止训练，即 `total_timesteps | 1.38e+06`。这大约需要 41 分钟，而 BC 预训练在我的 PC 上使用 CPU 进行训练大约需要 5.5 分钟。
+
+要在训练时观察环境，请添加 `--viz` 论点。在 BC 训练期间，环境将被冻结，因为此阶段除了获取有关观察和动作空间的一些信息外不使用环境。在 GAIL 训练阶段，环境渲染将会更新。
+
+以下是 `ep_rew_mean` 和 `ep_rew_wrapped_mean` 使用显示的日志统计数据 [张量板](https://github.com/edbeeching/godot_rl_agents/blob/main/docs/TRAINING_STATISTICS.md)，我们可以看到它们在本例中非常匹配：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/
+en/unit13/training_results.png" alt="训练结果"/>
+
+
+<Tip>
+您可以在以下位置找到日志 `logs/ILTutorial` 相对于您开始训练的路径。如果进行多次运行，请更改 `--experiment_name` 彼此之间的争论。
+</Tip>
+
+尽管设置环境奖励不是必需的并且不用于此处的训练，但仍实施了一个简单的稀疏奖励来跟踪成功。跌落到地图外、水中或陷阱中 `reward += -1`，同时激活控制杆，收集钥匙，并打开每组的宝箱 `reward += 1`。如果 `ep_rew_mean` 接近3，我们得到了很好的结果。 `ep_rew_wrapped_mean` 是来自 GAIL 判别器的奖励，它并不能直接告诉我们智能体在解决环境问题上有多成功。
+
+### 让我们测试训练好的代理
+
+训练结束后你会发现 `model.onnx` 文件位于您启动训练脚本的文件夹中 (您还可以找到完整路径 `.onnx` 文件在控制台的训练日志中，接近尾声). **将其复制到Godot游戏项目文件夹中。**
+
+### 打开onnx推理场景
+
+该场景与演示记录场景一样，仅使用关卡的一份副本。它还有它的 `Sync` 节点模式设置为 `Onnx Inference`. 
+
+**单击 `Sync` 节点并设置 `Onnx Model Path` 财产给 `model.onnx`.** 
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/
+en/unit13/onnx_inference_scene.jpg" alt="onnx 推理场景"/>
+
+**按 F6 启动场景，让我们看看智能体学到了什么！**
+
+训练有素的代理视频：
+<video src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit13/onnx_inference_test.mp4" type="video/mp4" controls autoplay loop mute />
+
+看来特工有能力从两个位置收集钥匙 (左平台或右平台) 并很好地复制记录的行为。 **如果您得到类似的结果，那么干得好，您已经成功完成了本教程！** 🏆👏
+
+如果您的结果明显不同，请注意录制的演示的数量和质量可能会影响结果，调整 BC/GAIL 阶段的步骤数以及修改 Python 脚本中的超参数可能会有所帮助。运行之间也存在一些差异，因此有时即使使用相同的设置，结果也可能略有不同。

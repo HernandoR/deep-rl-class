@@ -1,0 +1,132 @@
+# 测验
+
+最好的学习方式和 [以避免能力错觉](https://www.coursera.org/lecture/learning-how-to-learn/illusions-of-competence-BuFzf) **就是考验自己。**这将帮助您找到 **您需要巩固知识的地方**.
+
+### Q1：以下哪些工具是专门为视频游戏开发而设计的？
+
+<问题
+	选择={[
+		{
+			文本：“Unity (C#)",
+			解释一下：“”，
+            正确：正确，
+		},
+		{
+			文本：“Unreal Engine (C++)",
+			解释一下：“”，
+            正确：正确，
+		},
+		{
+			文本：“Godot (GDScript、C++、C#)",
+			解释一下：“”，
+            正确：正确，
+		},
+		{
+			文本：“JetBrains 的骑士”，
+			解释：“虽然 Unity 对 C# 的支持很有用，但它不是视频游戏开发 IDE”，
+            正确：错误，
+		},
+		{
+			文本：“JetBrains 的 CLion”，
+			解释：“虽然 Unreal Engine 对 C++ 的支持很有用，但它不是视频游戏开发 IDE”，
+            正确：错误，
+		},
+		{
+			文本：“Microsoft Visual Studio 和 Visual Studio Code”，
+			解释：“包括对 Unity 和 Unreal 的支持，它们是通用 IDE，不是面向视频游戏的。”,
+            正确：错误，
+		},
+	]}
+/>
+
+### 问题 2：以下关于 Unity ML-Agents 的说法哪些是正确的？
+
+<问题
+	选择={[
+		{
+			文本：“Unity‘场景’对象可用于创建学习环境”，
+			解释一下：“”，
+            正确：正确，
+		},
+		{
+			text：“单元 ML-Agents 允许您使用强化学习创建和训练代理”，
+			解释一下：“”，
+            正确：正确，
+		},
+        {
+			文字：“其 `Communicator` 组件管理 Unity 的 C# 环境/代理和 Python 后端之间的通信”，
+			解释一下：“”，
+            正确：正确，
+		},
+        {
+			text：“训练过程使用强化学习算法，在 Pytorch 中实现”，
+			解释一下：“”，
+            正确：正确，
+		},
+        {
+			text: "Unity ML-Agents 仅支持近端策略优化 (PPO)",
+			解释：“不，Unity ML-Agents 支持多个算法系列，包括 Actor-Critic，这将在下一节中解释”，
+            正确：错误，
+		},
+        {
+			文本：“它包括一个 Gym Wrapper 和一个名为的多代理版本 `PettingZoo`",
+			解释一下：“”，
+            正确：正确，
+		},
+	]}
+/>
+
+### Q3：填写缺失的字母
+
+- 在Unity ML-Agents中，Agent的Policy称为a b \_ \_ \_ n
+- 负责协调代理的组件称为 \_ c \_ \_ \_ m \_
+
+<details>
+<summary>解决方案</summary>
+<ul>
+	<li>大脑</li>
+	<li>学院</li>
+</ul>
+</details>
+
+### Q4：用你自己的话定义什么是 `raycast`
+
+<details>
+<summary>解决方案</summary>
+光线投射是 (大多数时候) 线性投影，作为 `laser` 其目的是检测物体的碰撞。
+</details>
+
+### Q5：使用捕捉环境有哪些区别 `frames` 或 `raycasts`?
+
+<问题
+	选择={[
+    {
+      文本：“通过使用 `frames`，环境由屏幕的每个像素定义。通过使用 `raycasts`，我们只发送这些像素的样本。",
+      解释一下：“`Raycasts` 和像素没有任何关系。它们是线性投影 (激光) 我们生成来寻找碰撞。",
+      正确：错误，
+    },
+    {
+      文本：“通过使用 `raycasts`，环境由屏幕的每个像素定义。通过使用 `frames`，我们生成一个 (通常) 线来检查它与哪些物体发生碰撞”，
+      解释一下：“情况正好相反—— `frames` 收集像素， `raycasts` 检查是否有碰撞。",
+      正确：错误，
+    },
+    {
+      文本：“通过使用 `frames`，我们收集屏幕上定义环境的所有像素。通过使用`raycast`，我们不使用像素，我们生成 (通常) 线并检查它们的碰撞”，
+      解释一下：“”，
+      正确：正确，
+    },
+	]}
+/>
+
+
+### Q6：说出用于在 Snowball 或 Pyramid 环境中训练代理的几个环境和代理输入变量
+
+<details>
+<summary>解决方案</summary>
+- 代理检测块产生的光线投射的碰撞， (看不见的) 墙壁、石头、我们的目标、开关等。
+- 描述代理特征（如速度）的传统输入
+- 布尔变量，作为开关 (开/关) 在 Pyramids 或 `can I shoot?` 在 SnowballTarget 中。
+</details>
+
+
+恭喜您完成本次测验🥳，如果您错过了一些内容，请花时间再次阅读本章以巩固 (😏) 你的知识。

@@ -1,0 +1,68 @@
+# Unity ML-Agents 如何工作？ [[how-mlagents-works]]
+
+在训练我们的代理之前，我们需要了解 **ML-Agents 是什么以及它是如何工作的**.
+
+## 什么是 Unity ML-Agents？ [[what-is-mlagents]]
+
+[Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents) 是游戏引擎 Unity 的工具包 **允许我们使用 Unity 创建环境或使用预制环境来训练我们的代理**.
+
+它的开发者是 [Unity 技术](https://unity.com/)是 Unity 的开发者，ZXTERM 是《Firewatch》、《Cuphead》和《Cities: Skylines》的创作者所使用的最著名的游戏引擎之一。
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit5/firewatch.jpeg" alt="Firewatch"/>
+<figcaption>Firewatch 是用 Unity 制作的</figcaption>
+</figure>
+
+## 六个组成部分 [[six-components]]
+
+使用 Unity ML-Agents，您拥有六个基本组件：
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit5/mlagents-1.png" alt="MLAgents"/>
+<figcaption>来源： <a href="https://unity-technologies.github.io/ml-agents/">Unity ML-Agents 文档</a> </figcaption>
+</figure>
+
+- 第一个是 *学习环境*，其中包含 **Unity 场景 (环境) 以及环境要素** (游戏角色).
+- 第二个是 *Python 低级 API*，其中包含 **用于交互和操作环境的低级 Python 接口**。这是我们用来启动训练的 API。
+- 然后，我们有 *外部通讯器* 那个 **连接学习环境 (用 C# 制作) 使用低级Python API (蟒蛇)**.
+- 的 *Python 训练器*: 的 **使用 PyTorch 制作的强化算法 (PPO，SAC…)**.
+- 的 *Gym 包装器*：将 RL 环境封装在gym包装器中。
+- 的 *PettingZoo 包装器*：PettingZoo 是Gym wrapper的多代理版本。
+
+## 学习组件内部 [[inside-learning-component]]
+
+在学习组件中，我们有 **两个重要元素**:
+
+- 第一个是 *代理组件*，场景的演员。我们会 **通过优化策略来训练代理** (这将告诉我们在每个州要采取什么行动)。该政策被称为 *大脑*.
+- 最后，还有 *学院*。该组件 **协调代理及其决策过程**。将此学院视为处理 Python API 请求的老师。
+
+为了更好地理解它的作用，让我们记住 RL 过程。这可以建模为一个循环，其工作原理如下：
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/RL_process.jpg" alt="The RL process" width="100%">
+<figcaption>RL 流程：状态、行动、奖励和下一个状态的循环</figcaption>
+<figcaption>来源： <a href="http://incompleteideas.net/book/RLbook2020.pdf">强化学习：简介，Richard Sutton 和 Andrew G. Barto</a></figcaption>
+</figure>
+
+现在，让我们想象一个代理学习玩平台游戏。 RL 流程如下所示：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/RL_process_game.jpg" alt="The RL process" width="100%">
+
+- 我们的代理收到 **状态  \\(S_0\\)** 从 **环境** — 我们收到游戏的第一帧 (环境).
+- 基于此 **状态 \\(S_0\\),** 代理采取 **行动 \\(A_0\\)** — 我们的特工将移至右侧。
+- 环境转到一个 **新的** **状态 \\(S_1\\)** — 新框架。
+- 环境给了一些 **奖励 \\(R_1\\)** 致特工——我们还没死 *(正面奖励+1)*.
+
+该 RL 循环输出一系列 **状态、行动、奖励和下一个状态。** 代理人的目标是 **最大化预期累积奖励**.
+
+该学院将是一个**将订单发送给我们的代理商并确保代理商同步**:
+
+- 收集观察结果
+- 使用您的政策选择您的操作
+- 采取行动
+- 如果达到最大步数或完成，请重置。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit5/academy.png" alt="The MLAgents Academy" width="100%">
+
+
+现在我们了解了 ML-Agents 的工作原理， **我们已准备好培训我们的代理商。**

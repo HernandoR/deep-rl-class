@@ -1,0 +1,37 @@
+# 探索/利用权衡 [[exp-exp-tradeoff]]
+
+最后，在研究解决强化学习问题的不同方法之前，我们必须讨论一个非常重要的主题： *勘探/开发的权衡。*
+
+- *探索* 通过尝试随机动作来探索环境，以便 **查找有关环境的更多信息。**
+- *剥削* 是 **利用已知信息来最大化奖励。**
+
+请记住，我们 RL 代理的目标是最大化预期累积奖励。然而， **我们可能会陷入一个共同的陷阱**.
+
+举个例子：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/exp_1.jpg" alt="Exploration" width="100%">
+
+在这个游戏中，我们的鼠标可以有一个 **无限量的小奶酪** (每个+1)。但在迷宫的顶端，有大量的奶酪 (+1000).
+
+然而，如果我们只专注于剥削，我们的代理永远无法达到奶酪的巨大数量。相反，它只会利用 **最近的奖励来源，** 即使这个来源很小 (剥削).
+
+但如果我们的代理做一点探索，它可以 **发现巨大的奖励** (一堆大奶酪).
+
+这就是我们所说的探索/利用权衡。我们需要平衡我们的努力程度 **探索环境** 以及我们有多少 **利用我们对环境的了解。**
+
+因此，我们必须 **定义一个有助于处理这种权衡的规则**。我们将在未来的单元中看到处理它的不同方法。
+
+如果仍然感到困惑， **想到一个现实问题：挑选餐厅的选择：**
+
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/exp_2.jpg" alt="Exploration">
+<figcaption>来源： <a href="https://inst.eecs.berkeley.edu/~cs188/sp20/assets/lecture/lec15_6up.pdf"> 伯克利人工智能课程</a>
+</figcaption>
+</figure>
+
+- *剥削*：你每天都去同一个你知道很好的地方，并且 **冒着错过另一家更好的餐厅的风险。**
+- *探索*：尝试以前从未去过的餐厅，冒着获得糟糕体验的风险 **但可能有机会获得美妙的体验。**
+
+回顾一下：
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/expexpltradeoff.jpg" alt="Exploration Exploitation Tradeoff" width="100%">

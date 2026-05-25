@@ -1,0 +1,25 @@
+# Q-Learning 回顾 [[q-learning-recap]]
+
+
+*Q-Learning* **是 RL 算法** :
+
+- 火车 *Q函数*, 一个 **行动价值函数** 编码，在内部存储器中，由 *Q表* **包含所有状态-动作对值。**
+
+- 给定一个状态和动作，我们的 Q 函数 **将在其 Q 表中搜索相应的值。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-function-2.jpg" alt="Q function"  width="100%"/>
+
+- 当训练结束后， **我们有一个最优 Q 函数，或者等效地，一个最优 Q 表。**
+
+- 如果我们 **具有最优 Q 函数**，我们
+有一个最优策略，因为我们 **了解每个州应采取的最佳行动。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/link-value-policy.jpg" alt="Link value policy"  width="100%"/>
+
+但是，一开始，我们的 **Q-table 是无用的，因为它为每个状态-动作对提供任意值 (大多数时候我们将 Q 表初始化为 0 值)**。但是，当我们探索环境并更新 Q 表时，它将为我们提供越来越好的近似值。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/unit2/q-learning.jpeg" alt="q-learning.jpeg" width="100%"/>
+
+这是 Q-Learning 伪代码：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-2.jpg" alt="Q-Learning" width="100%"/>

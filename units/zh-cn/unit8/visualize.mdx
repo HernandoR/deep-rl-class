@@ -1,0 +1,68 @@
+# 可视化修剪的代理目标函数
+
+别担心。 **如果现在处理起来很复杂，这是正常的**。但我们将看看这个裁剪后的代理目标函数是什么样子，这将帮助您更好地可视化正在发生的事情。
+
+<figure class="image table text-center m-0 w-full">
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/recap.jpg" alt="PPO"/>
+  <figcaption><a href="https://fse.studenttheses.ub.rug.nl/25709/1/mAI_2021_BickD.pdf">表格来自“迈向提供连贯的、独立的
+    近端策略优化的解释”作者：Daniel Bick</a></figcaption>
+</figure>
+
+我们有六种不同的情况。首先请记住，我们取裁剪目标和未裁剪目标之间的最小值。
+
+## 情况 1 和 2：比率在范围之间
+
+在情况 1 和 2 中， **由于比率在范围之间，因此不应用裁剪** \\( [1 - \epsilon, 1 + \epsilon] \\)
+
+在情况1中，我们有一个积极的优势： **行动优于平均水平** 该状态下的所有操作。因此，我们应该鼓励我们当前的政策增加在该州采取该行动的可能性。
+
+由于比率是在区间之间， **我们可以增加我们的政策在该状态下采取该行动的可能性。**
+
+在情况 2 中，我们有一个负面优势：该动作比该状态下所有动作的平均值更差。因此，我们应该阻止我们当前的政策在该州采取这种行动。
+
+由于比率是在区间之间， **我们可以降低我们的政策在该状态下采取该行动的可能性。**
+
+## 情况3和4：比率低于范围
+<figure class="image table text-center m-0 w-full">
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/recap.jpg" alt="PPO"/>
+  <figcaption><a href="https://fse.studenttheses.ub.rug.nl/25709/1/mAI_2021_BickD.pdf">表格来自“迈向提供连贯的、独立的
+    近端策略优化的解释”作者：Daniel Bick</a></figcaption>
+</figure>
+
+如果概率比低于 \\( [1 - \epsilon] \\)，在该状态下采取该操作的概率比旧策略低得多。
+
+如果像情况 3 一样，优势估计为正 (A>0)，那么 **您想要增加在该状态下采取该操作的可能性。**
+
+但如果像情况 4 那样，优势估计为负， **我们不想进一步减少** 在该状态下采取该操作的概率。因此，梯度 = 0 (因为我们在一条直线上)，所以我们不更新权重。
+
+## 情况5和6：比率超出范围
+<figure class="image table text-center m-0 w-full">
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/recap.jpg" alt="PPO"/>
+  <figcaption><a href="https://fse.studenttheses.ub.rug.nl/25709/1/mAI_2021_BickD.pdf">表格来自“迈向提供连贯的、独立的
+    近端策略优化的解释”作者：Daniel Bick</a></figcaption>
+</figure>
+
+如果概率比高于 \\( [1 + \epsilon] \\)，在当前政策的该状态下采取该行动的概率是 **远高于之前的政策。**
+
+如果像情况 5 那样，优势是正的， **我们不想太贪心**。与之前的政策相比，我们在该状态下采取该行动的可能性已经更高。因此，梯度 = 0 (因为我们在一条直线上)，所以我们不更新权重。
+
+如果像情况 6 一样，优势为负，我们希望降低在该状态下采取该操作的概率。
+
+所以如果我们回顾一下， **我们仅使用未剪辑的目标部分更新策略**。当最小值是被裁剪的目标部分时，我们不会更新策略权重，因为梯度将等于 0。
+
+因此，我们仅在以下情况下更新我们的政策：
+- 我们的比例在范围内 \\( [1 - \epsilon, 1 + \epsilon] \\)
+- 我们的比率超出了范围，但是 **优势导致更接近范围**
+    - 低于比率但优势 > 0
+    - 高于比率但优势< 0
+
+**你可能想知道为什么当裁剪比率最小值时梯度为 0。** 当比率被剪裁时，这种情况下的导数将不是 \\( r_t(\theta) * A_t \\)   但两者的导数 \\( (1 - \epsilon)* A_t\\) 或导数 \\( (1 + \epsilon)* A_t\\) 两者都 = 0。
+
+
+总而言之，由于这个简化的替代目标， **我们限制当前政策与旧政策的差异范围。** 因为我们消除了概率比移出区间的动机，因为剪辑迫使梯度为零。如果比例> \\( 1 + \epsilon \\) 或 < \\( 1 - \epsilon \\) 梯度将等于 0。
+
+PPO Actor-Critic 风格的最终 Clipped Surrogate Objective Loss 如下所示，它是 Clipped Surrogate Objective function、Value Loss Function 和 Entropy Bonus 的组合：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/ppo-objective.jpg" alt="PPO objective"/>
+
+那是相当复杂的。花点时间通过查看表格和图表来了解这些情况。 **你必须明白为什么这是有道理的。** 如果你想更深入，最好的资源是文章 [Daniel Bick 的“Towards Delivering a Coherent Self-Contained Explanation of Proximal Policy Optimization”，尤其是第 3.4 部分](https://fse.studenttheses.ub.rug.nl/25709/1/mAI_2021_BickD.pdf).

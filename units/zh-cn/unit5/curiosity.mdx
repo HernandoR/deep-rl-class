@@ -1,0 +1,50 @@
+# (可选) 深度强化学习中的好奇心是什么？
+
+这是一个 (可选的) 好奇心简介。如果您想了解更多信息，可以阅读另外两篇文章，我们将深入探讨数学细节：
+
+- [通过下一状态预测进行好奇心驱动的学习](https://medium.com/data-from-the-trenches/curiosity-driven-learning-through-next-state-prediction-f7f4e2f592fa)
+- [随机网络蒸馏：好奇心驱动学习的新视角](https://medium.com/data-from-the-trenches/curiosity-driven-learning-through-random-network-distillation-488ffd8e5938)
+
+## 现代RL的两大问题
+
+要了解什么是好奇心，我们首先需要了解 RL 的两个主要问题：
+
+首先， *稀疏奖励问题：* 也就是说， **大多数奖励不包含信息，因此设置为零**.
+
+请记住，RL 基于 *奖励假设*，这是每个目标都可以描述为奖励最大化的想法。因此，奖励对于 RL 代理来说是一种反馈； **如果他们没有收到任何信息，他们知道哪种行动是适当的 (或不) 无法改变**.
+
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit5/curiosity1.png" alt="Curiosity"/>
+<figcaption>来源：由于奖励，我们的代理知道该状态下的此操作是好的</figcaption>
+</figure>
+
+
+例如，在 [VizDoom](https://vizdoom.cs.put.edu.pl/)，一组基于《Doom》游戏“DoomMyWayHome”的环境，你的代理只会获得奖励 **如果它找到背心**.
+然而，背心离你的起点很远，所以你的大部分奖励将为零。因此，如果我们的代理没有收到有用的反馈 (密集奖励)，需要更长的时间来学习最优策略，并且 **它可能会花时间转身却找不到目标**.
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit5/curiosity2.png" alt="Curiosity"/>
+
+第二个大问题是 **外在奖励函数是手工制定的；在每种环境中，人类都必须执行奖励函数**。但是我们如何在大型复杂的环境中扩展它呢？
+
+## 那么什么是好奇心呢？
+
+解决这些问题的方法是 **开发代理固有的奖励函数，即由代理本身生成**。代理将充当自学习者，因为它将是学生和自己的反馈大师。
+
+**这种内在的奖励机制被称为好奇心** 因为这种奖励会促使智能体探索新奇/不熟悉的状态。为了实现这一目标，我们的智能体在探索新轨迹时将获得高额奖励。
+
+这种奖励的灵感来自于人类的行为方式。 ** 我们天生就有探索环境和发现新事物的内在渴望**.
+
+有不同的方法来计算这种内在奖励。经典方法 (通过下一状态预测产生好奇心) 是计算好奇心 **考虑到当前状态和采取的行动，我们的代理在预测下一个状态时的错误**.
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit5/curiosity3.png" alt="Curiosity"/>
+
+因为好奇心的想法是 **鼓励我们的智能体采取行动，减少智能体预测其行为后果的能力的不确定性** (在智能体花费较少时间或动态复杂的区域中，不确定性会更高).
+
+如果智能体在这些状态上花费大量时间，它将擅长预测下一个状态 (好奇心低)。另一方面，如果它处于一个新的、未经探索的状态，则很难预测接下来的状态(高度好奇心).
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit5/curiosity4.png" alt="Curiosity"/>
+
+使用好奇心将促使我们的代理支持具有高预测误差的转换 (在智能体花费较少时间的区域或动态复杂的区域中，该值会更高) 和 **从而更好地探索我们的环境**.
+
+还有 **其他好奇心计算方法**。 ML-Agents 通过随机网络蒸馏使用一种称为 Curiosity 的更先进的方法。这超出了本教程的范围，但如果您有兴趣 [我写了一篇文章详细解释了](https://medium.com/data-from-the-trenches/curiosity-driven-learning-through-random-network-distillation-488ffd8e5938).

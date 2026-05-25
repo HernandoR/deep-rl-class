@@ -1,0 +1,104 @@
+# 测验 [[quiz]]
+
+最好的学习方式和 [以避免能力错觉](https://www.coursera.org/lecture/learning-how-to-learn/illusions-of-competence-BuFzf) **就是考验自己。** 这将帮助您找到 **您需要巩固知识的地方**.
+
+### Q1：我们提到Q Learning是一种表格方法。什么是表格方法？
+
+<details>
+<summary>解决方案</summary>
+
+*表格方法* 是一类问题，其中状态和动作空间足够小，可以将值函数近似为 **表示为数组和表**。例如， **Q-Learning 是表格方法** 因为我们使用表来表示状态和操作值对。
+
+
+</details>
+
+### Q2：为什么我们不能使用经典的 Q-Learning 来解决 Atari 游戏？
+
+<问题
+	选择={[
+		{
+			text: "Atari 环境对于 Q-Learning 来说太快了",
+			解释一下：“”
+		},
+		{
+			text: "Atari 环境有很大的观察空间。因此创建更新 Q-Table 效率不高",
+			解释一下：“”，
+      正确：正确
+		}
+	]}
+/>
+
+
+### Q3：在 Deep Q-Learning 中使用帧作为输入时，为什么要将四个帧堆叠在一起？
+
+<details>
+<summary>解决方案</summary>
+
+我们将框架堆叠在一起，因为这对我们有帮助 **处理时间限制问题**：一帧不足以捕获时间信息。
+例如，在乒乓球比赛中，我们的代理人 **如果只获取一帧，将无法知道球的方向**.
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit4/temporal-limitation.jpg" alt="Temporal limitation"/>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit4/temporal-limitation-2.jpg" alt="Temporal limitation"/>
+
+
+</details>
+
+
+### Q4：Deep Q-Learning 分为哪两个阶段？
+
+<问题
+	选择={[
+		{
+			文本：“采样”，
+			解释：“我们执行动作并将观察到的经验元组存储在重播内存中。”,
+      正确：正确，
+		},
+		{
+			文本：“洗牌”，
+			解释一下：“”，
+		},
+    {
+      文本：“重新排名”，
+      解释一下：“”，
+    },
+    {
+			文本：“训练”，
+			解释：“我们随机选择一小批元组，并使用梯度下降更新步骤从中学习。”，
+      正确：正确，
+		}
+	]}
+/>
+
+### Q5：为什么我们要在Deep Q-Learning中创建重放内存？
+
+<details>
+   <summary>解决方案</summary>
+
+**1. 更有效地利用培训期间的经验**
+
+通常，在在线强化学习中，代理在环境中交互，获取经验 (状态、行动、奖励和下一个状态)，向他们学习 (更新神经网络)，并丢弃它们。这效率不高。
+但是，通过经验回放， **我们创建一个重放缓冲区来保存可以在训练期间重复使用的经验样本**.
+
+**2.避免忘记以前的经历，减少经历之间的相关性**
+
+如果我们向神经网络提供连续的经验样本，我们会遇到的问题是： **往往会忘记以前的经历，因为它会覆盖新的经历**。例如，如果我们处于第一级，然后进入第二级（这是不同的），我们的代理可能会忘记如何在第一级中表现和玩耍。
+
+
+</details>
+
+### Q6：我们如何使用Double Deep Q-Learning？
+
+
+<details>
+  <summary>解决方案</summary>
+
+  当我们计算 Q 目标时，我们使用两个网络将动作选择与目标 Q 值生成解耦。我们：
+
+  - 使用我们的 *DQN网络* 到 **选择针对下一个状态采取的最佳操作** (Q值最高的动作).
+
+  - 使用我们的 *目标网络* 计算 **在下一个状态采取该动作的目标 Q 值**.
+
+</details>
+
+
+恭喜您完成了本次测验🥳，如果您错过了一些内容，请花时间再次阅读本章以巩固 (😏) 你的知识。

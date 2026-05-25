@@ -1,0 +1,96 @@
+# 第二场测验 [[quiz2]]
+
+最好的学习方式和 [以避免能力错觉](https://www.coursera.org/lecture/learning-how-to-learn/illusions-of-competence-BuFzf) **就是考验自己。** 这将帮助您找到 **您需要巩固知识的地方**.
+
+
+### Q1：Q-Learning是什么？
+
+
+<问题
+	选择={[
+		{
+			text：“我们用来训练 Q 函数的算法”，
+			解释一下：“”，
+      正确：正确
+		},
+		{
+			文本：“值函数”，
+			解释：“这是一个行动价值函数，因为它决定了处于特定状态并在该状态下采取特定行动的价值”，
+		},
+    {
+			text：“一种算法，用于确定处于特定状态并在该状态下采取特定操作的价值”，
+			解释：“Q函数是确定处于特定状态并在该状态下采取特定行动的价值的函数。”，
+		},
+		{
+			文本：“一张桌子”，
+      			解释：“Q-learning 不是 Q-table。Q-function 是为 Q-table 提供数据的算法。”
+		}
+	]}
+/>
+
+### Q2：什么是Q表？
+
+<问题
+	选择={[
+		{
+			text: "我们在 Q-Learning 中使用的算法",
+			解释一下：“”，
+		},
+		{
+			text: "Q-table 是我们代理的内部存储器",
+			解释一下：“”，
+      正确：正确
+		},
+    {
+			text: "在 Q 表中，每个单元格对应一个状态值",
+			解释：“每个单元格对应一个状态-动作值对值。不是状态值。”,
+		}
+	]}
+/>
+
+### Q3：为什么如果我们有一个最优的 Q 函数 Q* 我们有最优的政策吗？
+
+<details>
+<summary>解决方案</summary>
+
+因为如果我们有一个最优的 Q 函数，我们就有一个最优的策略，因为我们知道每个状态应该采取什么最佳行动。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/link-value-policy.jpg" alt="link value policy"/>
+
+</details>
+
+### Q4：您能解释一下什么是Epsilon-Greedy策略吗？
+
+<details>
+<summary>解决方案</summary>
+Epsilon 贪婪策略是一种处理探索/利用权衡的策略。
+
+我们的想法是定义 epsilon ɛ = 1.0：
+
+- 与 *概率 1 — ɛ*：我们进行剥削 (也就是我们的代理选择具有最高状态-动作对值的动作).
+- 与 *概率 ɛ* : 我们进行探索 (尝试随机动作).
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/Q-learning-4.jpg" alt="Epsilon Greedy"/>
+
+
+</details>
+
+### Q5：我们如何更新状态、动作对的 Q 值？
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/q-update-ex.jpg" alt="Q Update exercise"/>
+
+<details>
+<summary>解决方案</summary>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/q-update-solution.jpg" alt="Q Update exercise"/>
+
+</details>
+
+
+
+### Q6：在政策和离政策有什么区别
+
+<details>
+<summary>解决方案</summary>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/off-on-4.jpg" alt="On/off policy"/>
+</details>
+
+恭喜您完成了本次测验🥳，如果您错过了一些内容，请花时间再次阅读本章以巩固 (😏) 你的知识。

@@ -1,0 +1,416 @@
+# 动手实践
+
+<CourseFloatingBanner classNames="absolute z-10 right-0 top-0"
+笔记本={[
+  {label: "Google Colab", value: "https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit5/unit5.ipynb"}
+  ]}
+  AskForHelpUrl="http://hf.co/join/discord" />
+
+
+我们了解了 ML-Agents 是什么以及它是如何工作的。我们还研究了我们将要使用的两种环境。现在我们准备好培训我们的代理了！
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/envs.png" alt="Environments" />
+
+为了验证认证过程的实际操作，您 **只需将您训练好的模型推送到 Hub 即可。**
+有 **没有达到最低限度的结果** 为了验证这一点。但如果你想获得好的结果，你可以尝试达到以下目标：
+
+- 对于 [Pyramids](https://huggingface.co/spaces/unity/ML-Agents-Pyramids)：平均奖励 = 1.75
+- 对于 [SnowballTarget](https://huggingface.co/spaces/ThomasSimonini/ML-Agents-SnowballTarget)：平均奖励 = 每集中射击 15 或 30 个目标。
+
+有关认证过程的更多信息，请查看此部分👉 https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process
+
+**要开始实践，请单击 Open In Colab 按钮** 👇 :
+
+[![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit5/unit5.ipynb)
+
+我们强烈 **建议学生使用 Google Colab 进行实践练习** 而不是在个人计算机上运行它们。 
+
+通过使用 Google Colab， **您可以专注于学习和实验，而不必担心技术方面的问题** 设置您的环境。
+
+# Unit 5: An Introduction to ML-Agents
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/thumbnail.png" alt="Thumbnail"/>
+
+在此笔记本中，您将了解 ML-Agents 并训练两个代理。
+
+- 第一个将学习 **将雪球射到产卵目标上**.
+- 第二个需要按下按钮来生成 Pyramid，然后导航到金字塔，将其打倒， **然后移动到顶部的金砖**。为此，它需要探索其环境，我们将使用一种称为好奇心的技术。
+
+之后，您将能够 **直接在浏览器上观看您的代理进行比赛**.
+
+有关认证过程的更多信息，请查看此部分👉 https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process
+
+⬇️ 这是一个例子 **您将在本单元结束时实现。** ⬇️
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/pyramids.gif" alt="Pyramids"/>
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/snowballtarget.gif" alt="SnowballTarget"/>
+
+### 🎮 环境：
+
+- [Pyramids](https://github.com/Unity-Technologies/ml-agents/blob/main/docs/Learning-Environment-Examples.md#pyramids)
+- SnowballTarget
+
+### 📚 RL-库：
+
+- [ML-Agents](https://github.com/Unity-Technologies/ml-agents)
+
+我们一直在努力改进我们的教程，所以 **如果您发现此笔记本存在问题**，请 [在 GitHub 存储库上提出问题](https://github.com/huggingface/deep-rl-class/issues).
+
+## 本笔记本的目标🏆
+
+在笔记本的最后，您将：
+
+- 了解如何 **ML-Agents** 作品和环境库。
+- 能够 **train agents in Unity Environments**.
+
+## 先决条件🏗️
+在深入了解笔记本之前，您需要：
+
+🔲 📚 **学习 [ML-Agents 是什么以及它是如何工作的，请阅读第 5 单元](https://huggingface.co/deep-rl-course/unit5/introduction)**  🤗
+
+# 让我们培训我们的代理商🚀
+
+## 设置 GPU 💪
+
+- 至 **加速代理的训练，我们将使用 GPU**。为此，请转至 `Runtime > Change Runtime type`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step1.jpg" alt="GPU Step 1">
+
+- `Hardware Accelerator > GPU`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step2.jpg" alt="GPU Step 2">
+
+## 克隆存储库🔽
+
+- 我们需要克隆存储库，其中包含 **ML-Agents。**
+
+```bash
+# Clone the repository (can take 3min)
+git clone --depth 1 https://github.com/Unity-Technologies/ml-agents
+```
+
+## 设置虚拟环境🔽
+
+- 为了 **ML-Agents** 要在 Colab 中成功运行，Colab 的 Python 版本必须满足库的 Python 要求。
+
+- 我们可以在下面检查支持的Python版本 `python_requires` 中的参数 `setup.py` 文件。需要这些文件来设置 **ML-Agents** 供使用的库，可以在以下位置找到：
+  - `/content/ml-agents/ml-agents/setup.py`
+  - `/content/ml-agents/ml-agents-envs/setup.py`
+
+- Colab当前的Python版本(可以使用检查 `!python --version`) 与图书馆的不匹配 `python_requires` 参数，因此当稍后执行相同的命令时，安装可能会默默失败并导致类似以下的错误：
+  - `/bin/bash: line 1: mlagents-learn: command not found`
+  - `/bin/bash: line 1: mlagents-push-to-hf: command not found`
+
+- 为了解决这个问题，我们将创建一个虚拟环境，其Python版本与 **ML-Agents** 图书馆。
+
+`Note:` *为了将来的兼容性，请务必检查 `python_requires` 如果 Colab 的 Python 版本不兼容，请在安装文件中将参数设置为以下脚本中支持的最大 Python 版本*
+
+```bash
+# Colab's Current Python Version (Incompatible with ML-Agents)
+!python --version
+```
+
+```bash
+# Install virtualenv and create a virtual environment
+!pip install virtualenv
+!virtualenv myenv
+
+# Download and install Miniconda
+!wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+!chmod +x Miniconda3-latest-Linux-x86_64.sh
+!./Miniconda3-latest-Linux-x86_64.sh -b -f -p /usr/local
+
+# Activate Miniconda and install Python ver 3.10.12
+!source /usr/local/bin/activate
+!conda install -q -y --prefix /usr/local python=3.10.12 ujson  # Specify the version here
+
+# Set environment variables for Python and conda paths
+!export PYTHONPATH=/usr/local/lib/python3.10/site-packages/
+!export CONDA_PREFIX=/usr/local/envs/myenv
+```
+
+```bash
+# Python Version in New Virtual Environment (Compatible with ML-Agents)
+!python --version
+```
+
+## 安装依赖项🔽
+
+```bash
+# Go inside the repository and install the package (can take 3min)
+%cd ml-agents
+pip3 install -e ./ml-agents-envs
+pip3 install -e ./ml-agents
+```
+
+## SnowballTarget ⛄
+
+如果您需要了解此环境的工作原理，请查看此部分 👉
+https://huggingface.co/deep-rl-course/unit5/snowball-target
+
+### 下载环境 zip 文件并将其移至 `./training-envs-executables/linux/`
+
+- 我们的环境可执行文件位于 zip 文件中。
+- 我们需要下载它并将其放置到 `./training-envs-executables/linux/`
+- 我们使用 Linux 可执行文件，因为我们使用 colab，而 colab 机器操作系统是 Ubuntu (操作系统)
+
+```bash
+# Here, we create training-envs-executables and linux
+mkdir ./training-envs-executables
+mkdir ./training-envs-executables/linux
+```
+
+我们从以下位置下载了文件 SnowballTarget.zip https://github.com/huggingface/Snowball-Target 使用 `wget`
+
+```bash
+wget "https://github.com/huggingface/Snowball-Target/raw/main/SnowballTarget.zip" -O ./training-envs-executables/linux/SnowballTarget.zip
+```
+
+我们解压可执行文件.zip
+
+```bash
+unzip -d ./training-envs-executables/linux/ ./training-envs-executables/linux/SnowballTarget.zip
+```
+
+确保您的文件可访问
+
+```bash
+chmod -R 755 ./training-envs-executables/linux/SnowballTarget
+```
+
+### 定义 SnowballTarget 配置文件
+- 在 ML-Agents 中，您定义 **在 config.yaml 文件中训练超参数。**
+
+有多个超参数。为了更好地理解它们，您应该阅读中每一项的解释 [文档](https://github.com/Unity-Technologies/ml-agents/blob/release_20_docs/docs/Training-Configuration-File.md)
+
+
+你需要创建一个 `SnowballTarget.yaml` 配置文件位于 ./content/ml-agents/config/ppo/
+
+我们将为您提供此配置的初步版本 (复制并粘贴到您的 `SnowballTarget.yaml file`), **但你应该修改它**.
+
+```yaml
+behaviors:
+  SnowballTarget:
+    trainer_type: ppo
+    summary_freq: 10000
+    keep_checkpoints: 10
+    checkpoint_interval: 50000
+    max_steps: 200000
+    time_horizon: 64
+    threaded: true
+    hyperparameters:
+      learning_rate: 0.0003
+      learning_rate_schedule: linear
+      batch_size: 128
+      buffer_size: 2048
+      beta: 0.005
+      epsilon: 0.2
+      lambd: 0.95
+      num_epoch: 3
+    network_settings:
+      normalize: false
+      hidden_units: 256
+      num_layers: 2
+      vis_encode_type: simple
+    reward_signals:
+      extrinsic:
+        gamma: 0.99
+        strength: 1.0
+```
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/snowballfight_config1.png" alt="Config SnowballTarget"/>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/snowballfight_config2.png" alt="Config SnowballTarget"/>
+
+作为实验，尝试修改一些其他超参数。 Unity 提供非常 [很好的文档在这里解释了它们中的每一个](https://github.com/Unity-Technologies/ml-agents/blob/main/docs/Training-Configuration-File.md).
+
+现在您已经创建了配置文件并了解大多数超参数的作用，我们准备好训练我们的代理了🔥。
+
+### 培训代理
+
+为了训练我们的代理，我们需要 **启动 mlagents-learn 并选择包含环境的可执行文件。**
+
+我们定义四个参数：
+
+1. `mlagents-learn <config>`：超参数配置文件所在路径。
+2. `--env`：环境可执行文件所在的位置。
+3. `--run_id`：您要为训练运行 ID 指定的名称。
+4. `--no-graphics`：在训练期间不启动可视化。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/mlagentslearn.png" alt="MlAgents learn"/>
+
+训练模型并使用 `--resume` 标记在中断时继续训练。
+
+> 如果您使用时，第一次会失败 `--resume`。尝试重新运行该块以绕过该错误。
+
+培训将需要 10 到 35 分钟，具体取决于您的配置。去拿一个☕️你应得的🤗。
+
+```bash
+mlagents-learn ./config/ppo/SnowballTarget.yaml --env=./training-envs-executables/linux/SnowballTarget/SnowballTarget --run-id="SnowballTarget1" --no-graphics
+```
+
+### 将代理推送到 Hugging Face Hub
+
+- 现在我们已经训练了我们的代理，我们 **准备好将其推送到 Hub 并可视化它在浏览器上播放🔥。**
+
+为了能够与社区共享您的模型，还需要遵循三个步骤：
+
+1️⃣ (如果还没有完成) 创建 HF 帐户 ➡ https://huggingface.co/join
+
+2️⃣ 从 Hugging Face 网站登录并存储您的身份验证令牌。
+- 创建一个新令牌 (https://huggingface.co/settings/tokens) **具有写入角色**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/create-token.jpg" alt="Create HF Token">
+
+- 复制令牌
+- 运行下面的单元格并粘贴令牌
+
+```python
+from huggingface_hub import notebook_login
+
+notebook_login()
+```
+
+如果您不想使用 Google Colab 或 Jupyter Notebook，则需要使用以下命令： `huggingface-cli login`
+
+然后我们需要运行 `mlagents-push-to-hf`.
+
+我们定义了四个参数：
+
+1. `--run-id`：训练运行 ID 的名称。
+2. `--local-dir`：代理保存在哪里，是结果/<run_id name>，所以就我而言，结果/第一次训练。
+3. `--repo-id`：您要创建或更新的 Hugging Face 存储库的名称。总是如此 <your huggingface username>/<the repo name>
+如果仓库不存在 **它将自动创建**
+4. `--commit-message`：由于 HF 存储库是 git 存储库，因此您需要提供提交消息。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/mlagentspushtohub.png" alt="Push to Hub"/>
+
+例如：
+
+`mlagents-push-to-hf  --run-id="SnowballTarget1" --local-dir="./results/SnowballTarget1" --repo-id="ThomasSimonini/ppo-SnowballTarget"  --commit-message="First Push"`
+
+```python
+mlagents-push-to-hf  --run-id= # Add your run id  --local-dir= # Your local dir  --repo-id= # Your repo id  --commit-message= # Your commit message
+```
+
+如果一切正常，您应该在流程结束时看到这一点(但有不同的网址😆) :
+
+
+
+```
+Your model is pushed to the hub. You can view your model here: https://huggingface.co/ThomasSimonini/ppo-SnowballTarget
+```
+
+这是您模型的链接。它包含一张解释如何使用它的模型卡、Tensorboard 和配置文件。 **很棒的是它是一个 git 存储库，这意味着您可以进行不同的提交、使用新的推送更新存储库等。**
+
+但现在最好的来了： **能够在线可视化您的代理👀。**
+
+### 观看你的经纪人的比赛👀
+
+这一步很简单：
+
+1. 去这里： https://huggingface.co/spaces/ThomasSimonini/ML-Agents-SnowballTarget
+
+2. 启动游戏并点击右下角按钮将其全屏显示
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/snowballtarget_load.png" alt="Snowballtarget load"/>
+
+1. 在第 1 步中，输入您的用户名 (您的用户名区分大小写：例如，我的用户名是 ThomasSimonini，而不是 thomassimonini 或 ThOmasImoNInI) 并单击搜索按钮。
+
+2. 在步骤 2 中，选择您的模型存储库。
+
+3. 在步骤 3 中， **选择您想要重播的模型**:
+  - 我有多个模型，因为我们每 500000 个时间步保存一个模型。
+  - 但因为我想要最新的，所以我选择 `SnowballTarget.onnx`
+
+👉 不错 **尝试不同的模型步骤来查看代理的改进。**
+
+
+请毫不犹豫地在 #rl-i-made-this 频道中分享您的代理在Discord 中获得的最佳分数 🔥
+
+现在让我们尝试一个更具挑战性的环境，称为 Pyramids。
+
+## Pyramids 🏆
+
+### 下载环境 zip 文件并将其移至 `./training-envs-executables/linux/`
+- 我们的环境可执行文件位于 zip 文件中。
+- 我们需要下载它并将其放入 `./training-envs-executables/linux/`
+- 我们使用 Linux 可执行文件，因为我们使用 colab，并且 colab 机器的操作系统是 Ubuntu (操作系统)
+
+我们从以下位置下载了文件 Pyramids.zip https://huggingface.co/spaces/unity/ML-Agents-Pyramids/resolve/main/Pyramids.zip 使用 `wget`
+
+```python
+wget "https://huggingface.co/spaces/unity/ML-Agents-Pyramids/resolve/main/Pyramids.zip" -O ./training-envs-executables/linux/Pyramids.zip
+```
+
+解压它
+
+```python
+unzip -d ./training-envs-executables/linux/ ./training-envs-executables/linux/Pyramids.zip
+```
+
+确保您的文件可访问
+
+```bash
+chmod -R 755 ./training-envs-executables/linux/Pyramids/Pyramids
+```
+
+###  修改PyramidsRND配置文件
+  
+- 与第一个环境（自定义环境）相反， **Pyramids由Unity团队制作**.
+- 因此 PyramidsRND 配置文件已经存在并且位于 ./content/ml-agents/config/ppo/PyramidsRND.yaml 中
+- 您可能会问为什么“RND”位于 PyramidsRND 中。 RND 代表 *随机网络蒸馏* 这是产生好奇心奖励的一种方式。如果您想了解更多信息，我们写了一篇文章解释了这项技术： https://medium.com/data-from-the-trenches/curiosity-driven-learning-through-random-network-distillation-488ffd8e5938
+
+对于本次培训，我们将修改一件事：
+- 总训练步数超参数太高，因为我们可以达到基准 (平均奖励 = 1.75) 仅 1M 训练步骤。
+👉 为此，我们转到 config/ppo/PyramidsRND.yaml，**并将 max_steps 更改为 1000000。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/pyramids-config.png" alt="Pyramids config"/>
+
+作为实验，您还应该尝试修改一些其他超参数。 Unity 提供非常 [很好的文档在这里解释了它们中的每一个](https://github.com/Unity-Technologies/ml-agents/blob/main/docs/Training-Configuration-File.md).
+
+我们现在准备好训练我们的代理了🔥。
+
+### 培训代理
+
+培训将需要 30 到 45 分钟，具体取决于您的机器，去参加 ☕️ 你应得的 🤗。
+
+```python
+mlagents-learn ./config/ppo/PyramidsRND.yaml --env=./training-envs-executables/linux/Pyramids/Pyramids --run-id="Pyramids Training" --no-graphics
+```
+
+### 将代理推送到 Hugging Face Hub
+
+- 现在我们训练了我们的代理，我们 **准备好将其推送到 Hub，以便能够在浏览器上可视化它的播放情况🔥。**
+
+```python
+mlagents-push-to-hf  --run-id= # Add your run id  --local-dir= # Your local dir  --repo-id= # Your repo id  --commit-message= # Your commit message
+```
+
+### 观看你的经纪人的比赛👀
+
+👉 https://huggingface.co/spaces/unity/ML-Agents-Pyramids
+  
+### 🎁 奖励：为什么不在另一个环境中训练呢？
+  
+现在您已经知道如何使用 MLAgents 训练代理了， **为什么不尝试另一个环境呢？**
+
+MLAgents 提供 17 种不同的环境，我们正在构建一些自定义环境。最好的学习方法就是自己尝试，享受乐趣。
+
+![封面](https://miro.medium.com/max/1400/0*xERdThTRRM2k_U9f.png)
+
+您可以在此处查看 Hugging Face 上当前可用环境的完整列表 👉 https://github.com/huggingface/ml-agents#the-environments
+
+用于可视化您的代理的演示 👉 https://huggingface.co/unity
+
+目前我们已经集成了： 
+- [蠕虫](https://huggingface.co/spaces/unity/ML-Agents-Worm) 您教的演示 **蠕虫爬行**.
+- [沃克](https://huggingface.co/spaces/unity/ML-Agents-Walker) 教代理的演示 **走向一个目标**.
+
+这就是今天的全部内容。恭喜您完成本教程！
+
+最好的学习方法是练习和尝试。为什么不尝试另一个环境呢？ ML-Agents 有 18 种不同的环境，但您也可以创建自己的环境。检查文档并享受乐趣！
+
+第六单元见🔥，
+
+## 不断学习，保持精彩🤗

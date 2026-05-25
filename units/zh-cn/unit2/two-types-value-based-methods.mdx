@@ -1,0 +1,86 @@
+# 两种基于价值的方法 [[two-types-value-based-methods]]
+
+在基于价值的方法中， **我们学习一个价值函数** 那个 **将状态映射到该状态的预期值。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/vbm-1.jpg" alt="Value Based Methods"/>
+
+状态的价值是 **预期折现回报** 代理可以得到如果 **从该状态开始，然后根据我们的政策采取行动。**
+
+<Tip>
+但按照我们的政策行事意味着什么？毕竟，我们没有基于价值的方法的策略，因为我们训练的是价值函数而不是策略。
+</Tip>
+
+请记住，目标是 **RL代理是有一个最优策略π\*.**
+
+为了找到最优策略，我们了解了两种不同的方法：
+
+- *基于策略的方法：* **直接训练策略** 选择给定状态要采取的操作 (或该状态下动作的概率分布)。在这种情况下，我们 **没有价值函数。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/two-approaches-2.jpg" alt="Two RL approaches"/>
+
+该策略将状态作为输入并输出在该状态下采取什么操作 (确定性策略：在给定状态下输出一个动作的策略，与输出动作概率分布的随机策略相反).
+
+因此， **我们不会手动定义我们政策的行为；训练将决定它。**
+
+- *基于价值的方法：* **间接地，通过训练价值函数** 输出状态或状态-动作对的值。给定这个价值函数，我们的政策 **将采取行动。**
+
+由于该策略没有经过训练/学习， **我们需要指定它的行为。** 例如，如果我们想要一个策略，在给定价值函数的情况下，将采取总是带来最大奖励的行动， **我们将创建一个贪婪策略。**
+
+<figure>
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/two-approaches-3.jpg" alt="Two RL approaches"/>
+  <figcaption>给定一个状态，我们的动作价值函数 (我们训练的) 输出该状态下每个动作的值。然后，我们预定义的贪婪策略选择在给定状态或状态操作对的情况下产生最高值的操作。</figcaption>
+</figure>
+
+因此，无论你用什么方法来解决你的问题， **你将会有一个政策**。在基于价值的方法的情况下，您不需要训练策略：您的策略 **只是一个简单的预先指定的函数** (例如，贪婪策略) 它使用值函数给出的值来选择其操作。
+
+所以区别是：
+
+- 在基于政策的培训中， **最优策略 (记为 π\*) 是通过直接训练策略找到的。**
+- 在基于价值的培训中， **寻找最优值函数 (记为 Q\* 或V\*，我们将研究下面的差异) 导致最优策略。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/link-value-policy.jpg" alt="Link between value and policy"/>
+
+事实上，大多数时候，在基于价值的方法中，您将使用 **Epsilon 贪婪策略** 处理勘探/开发的权衡；我们将在本单元第二部分讨论 Q-Learning 时讨论这一点。
+
+
+正如我们上面提到的，我们有两种类型的基于值的函数：
+
+## 状态值函数 [[state-value-function]]
+
+我们在策略 π 下编写状态价值函数，如下所示：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/state-value-function-1.jpg" alt="State value function"/>
+
+对于每个状态，状态值函数输出预期回报，如果代理 **从该状态开始** 然后永远遵循该政策 (对于所有未来的时间步长，如果您愿意的话).
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/state-value-function-2.jpg" alt="State value function"/>
+  <figcaption>如果我们采用值为 -7 的状态：这是从该状态开始并根据我们的策略采取行动的预期回报 (贪婪政策)，所以右，右，右，下，下，右，右。</figcaption>
+</figure>
+
+## 行动价值函数[[action-value-function]]
+
+在动作值函数中，对于每个状态和动作对，动作值函数 **输出预期回报** 如果代理从该状态开始，采取该操作，然后永远遵循该策略。
+
+采取行动的价值 \\(a\\) 处于状态 \\(s\\) 在一项政策下 \\(π\\) 是：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/action-state-value-function-1.jpg" alt="Action State value function"/>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/action-state-value-function-2.jpg" alt="Action State value function"/>
+
+
+我们看到区别在于：
+
+- 对于状态值函数，我们计算 **国家的价值 \\(S_t\\)**
+- 对于动作-价值函数，我们计算 **状态-动作对的值 ( \\(S_t, A_t\\) ) 因此，在该状态下采取该行动的价值。**
+
+<figure>
+  <img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit3/two-types.jpg" alt="Two types of value function"/>
+  <figcaption>
+注意：对于 Action-value 函数的示例，我们没有填写所有状态-动作对</figcaption>
+</figure>
+
+无论哪种情况，无论我们选择哪个价值函数 (状态值或动作值函数), **返回值是预期收益。**
+
+然而，问题是 **为了计算状态或状态-动作对的每个值，我们需要将代理从该状态开始可以获得的所有奖励相加。**
+
+这可能是一个计算成本高昂的过程，那就是 **贝尔曼方程可以帮助我们。**

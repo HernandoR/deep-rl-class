@@ -1,0 +1,54 @@
+# (自动) RL 课程学习
+
+虽然本课程中看到的大多数 RL 方法在实践中效果良好，但在某些情况下单独使用它们会失败。例如，在以下情况下可能会发生这种情况：
+
+- 学习任务是艰巨的，需要 **逐步获得技能** (例如，当一个人想让一个双足智能体学会穿过困难的障碍时，它必须首先学会站立，然后行走，然后也许会跳跃……)
+- 环境有变化 (影响难度的) 并且希望其代理人是 **稳健的** 对他们
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/bipedal.gif" alt="Bipedal"/>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/movable_creepers.gif" alt="Movable creepers"/>
+<figcaption> <a href="https://developmentalsystems.org/TeachMyAgent/">教我的代理</a> </figcaption>
+</figure>
+
+在这种情况下，似乎需要向我们的 RL 代理提出不同的任务并组织它们，以便代理逐步获得技能。这种方法称为 **课程学习** 通常意味着手工设计的课程 (或按特定顺序组织的一组任务)。在实践中，例如，可以控制环境的生成、初始状态，或者使用自我对战并控制向 RL 代理提出的对手的级别。
+
+由于设计这样的课程并不总是微不足道的，因此 **自动课程学习 (前交叉韧带) 提出设计学习创建此类任务组织的方法，以最大限度地提高 RL 代理的性能**。波特拉斯等人。建议将 ACL 定义为：
+
+> …一系列机制，通过学习调整学习情境的选择以适应 RL 代理的能力，从而自动适应训练数据的分布。
+>
+
+例如，使用 OpenAI **域随机化** (他们对环境施加了随机变化) 让机械手解决魔方问题。
+
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/dr.jpg" alt="Dr"/>
+<figcaption> <a href="https://openai.com/blog/solving-rubiks-cube/">OpenAI - 用机器人手解魔方</a></figcaption>
+</figure>
+
+最后，您可以利用在以下环境中训练的智能体的鲁棒性： <a href="https://huggingface.co/spaces/flowers-team/Interactive_DeepRL_Demo">教我的代理</a> 通过控制环境变化甚至绘制地形来进行基准测试👇
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit9/demo.png" alt="Demo"/>
+<figcaption> <a href="https://huggingface.co/spaces/flowers-team/Interactive_DeepRL_Demo">https://huggingface.co/spaces/flowers-team/Interactive_DeepRL_Demo</a></figcaption>
+</figure>
+
+
+## 进一步阅读
+
+如需了解更多信息，我们建议您查看以下资源：
+
+### 领域概况
+
+- [深度自动课程学习 RL：简短调查](https://arxiv.org/pdf/2003.04664.pdf)
+- [强化学习课程](https://lilianweng.github.io/posts/2020-01-29-curriculum-rl/)
+
+### 最近的方法
+
+- [不断发展的课程与基于遗憾的环境设计](https://arxiv.org/abs/2203.01302)
+- [通过约束最优传输进行课程强化学习](https://proceedings.mlr.press/v162/klink22a.html)
+- [优先关卡重播](https://arxiv.org/abs/2010.03934)
+
+## 作者
+
+本节的作者是 <a href="https://twitter.com/ClementRomac"> 克莱门特·罗马克 </a>

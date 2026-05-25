@@ -1,0 +1,70 @@
+# 优势演员评论家 (A2C) [[advantage-actor-critic]]
+
+## 使用 Actor-Critic 方法减少方差
+
+减少 Reinforce 算法的方差并更快更好地训练我们的代理的解决方案是结合使用基于策略和基于值的方法： *演员-评论家方法*.
+
+要理解 Actor-Critic，想象一下您正在玩一款视频游戏。您可以与朋友一起玩，他们会为您提供一些反馈。你是演员，你的朋友是评论家。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/ac.jpg" alt="Actor Critic"/>
+
+一开始你不知道怎么玩， **所以你随机尝试一些动作**。批评家观察你的行为并 **提供反馈**.
+
+从这个反馈中学习， **您将更新您的政策并更好地玩这个游戏。**
+
+另一方面，你的朋友 (批评家) 还将更新他们提供反馈的方式，以便下次做得更好。
+
+这就是 Actor-Critic 背后的想法。我们学习两个函数近似：
+
+- *一项政策* 那个 **控制我们的代理的行为方式**: \\( \pi_{\theta}(s) \\)
+
+- *值函数* 通过衡量所采取的行动的效果来协助政策更新： \\( \hat{q}_{w}(s,a) \\)
+
+## 演员-评论家过程
+现在我们已经了解了 Actor Critic 的总体情况，让我们更深入地了解 Actor 和 Critic 在训练过程中如何共同改进。
+
+正如我们所见，对于 Actor-Critic 方法，有两个函数近似 (两个神经网络):
+- *演员*, 一个 **政策功能** 由 theta 参数化： \\( \pi_{\theta}(s) \\)
+- *批评家*, 一个 **价值函数** 由 w 参数化： \\( \hat{q}_{w}(s,a) \\)
+
+让我们看看训练过程来了解 Actor 和 Critic 是如何优化的：
+- 在每个时间步 t，我们得到当前状态 \\( S_t\\) 来自环境和 **通过我们的 Actor 和 Critic 将其作为输入传递**.
+
+- 我们的政策需要国家和 **输出一个动作**  \\( A_t \\).
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/step1.jpg" alt="Step 1 Actor Critic"/>
+
+- 批评家也将该动作作为输入，并使用 \\( S_t\\) 和 \\( A_t \\), **计算在该状态下采取该操作的价值：Q 值**.
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/step2.jpg" alt="Step 2 Actor Critic"/>
+
+- 行动 \\( A_t\\) 在环境中执行输出一个新的状态 \\( S_{t+1}\\) 和奖励 \\( R_{t+1} \\) .
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/step3.jpg" alt="Step 3 Actor Critic"/>
+
+- Actor 使用 Q 值更新其策略参数。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/step4.jpg" alt="Step 4 Actor Critic"/>
+
+- 由于其更新的参数，Actor 会产生下一个要采取的动作 \\( A_{t+1} \\) 给定新状态 \\( S_{t+1} \\).
+
+- 然后 Critic 更新其值参数。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/step5.jpg" alt="Step 5 Actor Critic"/>
+
+## 增加演员评论家的优势 (A2C)
+我们可以通过以下方式进一步稳定学习 **使用 Advantage 函数作为 Critic 而不是 Action 值函数**.
+
+这个想法是，Advantage 函数计算一个动作与某个状态下可能的其他动作相比的相对优势： **与该州的平均值相比，在某个州采取该行动如何更好**。它从状态动作对中减去状态的平均值：
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/advantage1.jpg" alt="Advantage Function"/>
+
+换句话说，这个函数计算 **如果我们在该状态下采取此操作，我们获得的额外奖励与我们在该状态下获得的平均奖励相比**.
+
+额外奖励是超出该状态预期值的奖励。
+- 如果A(s,a) > 0：我们的梯度是 **朝那个方向推**.
+- 如果A(s,a) < 0 (我们的行动比该州的平均值更差), **我们的梯度被推向相反的方向**.
+
+实现这个优势函数的问题是它需要两个价值函数 -  \\( Q(s,a)\\) 和  \\( V(s)\\)。幸运的是， **我们可以使用 TD 误差作为优势函数的良好估计量。**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit8/advantage2.jpg" alt="Advantage Function"/>

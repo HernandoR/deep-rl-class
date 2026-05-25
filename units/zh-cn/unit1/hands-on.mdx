@@ -1,0 +1,699 @@
+# 训练你的第一个深度强化学习代理🤖 [[hands-on]]
+
+
+
+
+      <CourseFloatingBanner classNames="absolute z-10 right-0 top-0"
+      笔记本={[
+        {label: "Google Colab", value: "https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit1/unit1.ipynb"}
+        ]}
+        AskForHelpUrl="http://hf.co/join/discord" />
+
+现在您已经学习了强化学习的基础知识，您可以训练您的第一个代理并通过 Hub 🔥 与社区分享：
+月球着陆器特工将学习如何正确登陆月球🌕
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/lunarLander.gif" alt="LunarLander">
+
+最后，你会**将此训练有素的代理上传到 Hugging Face Hub 🤗，这是一个免费的开放平台，人们可以在其中共享 ML 模型、数据集和演示。**
+
+感谢我们的 <a href="https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard">排行榜</a>，您将能够与其他同学比较您的结果并交流最佳实践以提高代理的分数。谁将赢得第 1 单元🏆 的挑战？
+
+为了验证这一点 [认证流程](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)，您需要将训练好的模型推送到 Hub 并且 **得到 >= 200 的结果**.
+
+要查找结果，请转至 [排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard) 并找到你的模型， **结果 =mean_reward - 奖励标准差**
+
+**如果找不到您的型号，请转到页面底部并单击刷新按钮。**
+
+有关认证过程的更多信息，请查看此部分👉 https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process
+
+您可以在这里查看您的进度 👉 https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course
+
+那么让我们开始吧！ 🚀
+
+**要开始实践，请单击 Open In Colab 按钮** 👇 :
+
+[![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit1/unit1.ipynb)
+
+我们强烈 **建议学生使用 Google Colab 进行实践练习** 而不是在个人计算机上运行它们。 
+
+通过使用 Google Colab， **您可以专注于学习和实验，而不必担心技术方面的问题** 设置您的环境。
+
+# 第 1 单元：训练你的第一个深度强化学习代理 🤖
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/thumbnail.jpg" alt="Unit 1 thumbnail" width="100%">
+
+在本笔记本中，您将训练您的 **第一个深度强化学习代理** 月球登陆器代理将学会 **正确登陆月球🌕**。使用 [Stable-Baselines3](https://stable-baselines3.readthedocs.io/en/master/) 深度强化学习库，与社区分享，并尝试不同的配置
+
+
+### 环境🎮
+
+- [LunarLander-v2](https://gymnasium.farama.org/environments/box2d/lunar_lander/)
+
+### 使用的图书馆📚
+
+- [Stable-Baselines3](https://stable-baselines3.readthedocs.io/en/master/)
+
+我们一直在努力改进我们的教程，所以 **如果您发现此笔记本存在问题**，请 [在 Github Repo 上提出问题](https://github.com/huggingface/deep-rl-class/issues).
+
+## 本笔记本的目标🏆
+
+在笔记本的最后，您将：
+
+- 能够使用 **Gymnasium**，环境库。
+- 能够使用 **Stable-Baselines3**，深度强化学习库。
+- 能够 **将您训练有素的代理推送到 Hub** 带有精彩的视频回放和评估分数🔥。
+
+
+## 本笔记本来自深度强化学习课程
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/deep-rl-course-illustration.jpg" alt="Deep RL Course illustration"/>
+
+在这个免费课程中，您将：
+
+- 📖 研究深度强化学习 **理论与实践**.
+- 🧑‍💻 学习 **使用著名的 Deep RL 库** 例如 Stable Baselines3、RL Baselines3 Zoo、CleanRL 和 Sample Factory 2.0。
+- 🤖 火车 **独特环境中的代理** 
+- 🎓 **获得结业证书** 完成80%的作业。
+
+还有更多！ 
+
+检查📚教学大纲👉 https://simoninithomas.github.io/deep-rl-course
+
+别忘了 **<a href="http://eepurl.com/ic5ZUD">报名参加课程</a>** (我们收集您的电子邮件以便能够 **每个单元发布时向您发送链接，并向您提供有关挑战和更新的信息).**
+
+保持联系和提问的最佳方式是 **加入我们的discord服务器** 与社区和我们交流👉🏻 https://discord.gg/ydHrjt3WP5
+
+## 先决条件🏗️
+
+在深入了解笔记本之前，您需要：
+
+🔲 📝 **[读取单元 0](https://huggingface.co/deep-rl-course/unit0/introduction)** 这给你所有 **有关课程的信息并帮助您加入** 🤗
+
+🔲 📚 **了解强化学习的基础** (MC、TD、奖励假设……) 通过 [阅读单元1](https://huggingface.co/deep-rl-course/unit1/introduction).
+
+## 深度强化学习的小回顾📚
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/RL_process_game.jpg" alt="The RL process" width="100%">
+
+让我们回顾一下我们在第一单元中学到的内容：
+
+- 强化学习是一种 **从行动中学习的计算方法**。我们构建了一个从环境中学习的代理 **通过反复试验与之互动** 并获得奖励 (消极或积极) 作为反馈。
+
+- 任何 RL 代理的目标是 **最大化其预期累积奖励** (也称为预期回报) 因为 RL 基于_奖励假设_，即所有目标都可以描述为预期累积奖励的最大化。
+
+- RL 进程是 **输出一系列状态、动作、奖励和下一个状态的循环**.
+
+- 计算预期累积奖励 (预期回报), **我们奖励折扣**: 奖励来得更早 (在游戏开始时) 发生的可能性更大，因为它们比长期的未来奖励更可预测。
+
+- 要解决 RL 问题，您需要 **找到最优策略**;策略是人工智能的“大脑”，它会告诉我们在给定的状态下要采取什么行动。最佳方案是能够为您提供最大化预期回报的操作。
+
+有 **两个** 找到最佳政策的方法：
+
+- 由 **直接培训您的政策**：基于政策的方法。
+- 由 **训练价值函数** 它告诉我们代理在每个状态下将获得的预期回报，并使用此函数来定义我们的策略：基于值的方法。
+
+- 最后，我们谈到 Deep RL 因为 **我们引入深度神经网络来估计要采取的行动 (基于政策的) 或估计一个状态的价值 (基于价值的) 因此得名“深”。**
+
+# 让我们训练我们的第一个深度强化学习代理并将其上传到 Hub 🚀
+
+## 获得证书🎓
+
+为了验证这一点 [认证流程](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)，您需要将训练好的模型推送到 Hub 并且 **得到 >= 200 的结果**.
+
+要查找结果，请转至 [排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard) 并找到你的模型， **结果 =mean_reward - 奖励标准差**
+
+有关认证过程的更多信息，请查看此部分👉 https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process
+
+## 设置 GPU 💪
+
+- 至 **加速代理的训练，我们将使用 GPU**。为此，请转至 `Runtime > Change Runtime type`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step1.jpg" alt="GPU Step 1">
+
+- `Hardware Accelerator > GPU`
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/gpu-step2.jpg" alt="GPU Step 2">
+
+## 安装依赖项并创建虚拟屏幕🔽
+
+第一步是安装依赖项，我们将安装多个依赖项。
+
+- `gymnasium[box2d]`：包含LunarLander-v2环境🌛
+- `stable-baselines3[extra]`：深度强化学习库。
+- `huggingface_sb3`：Stable-baselines3 的附加代码，用于从 Hugging Face 🤗 Hub 加载和上传模型。
+
+为了使事情变得更容易，我们创建了一个脚本来安装所有这些依赖项。
+
+```bash
+apt install swig cmake
+```
+
+```bash
+pip install -r https://raw.githubusercontent.com/huggingface/deep-rl-class/main/notebooks/unit1/requirements-unit1.txt
+```
+
+在笔记本过程中，我们需要生成重播视频。为此，通过 Colab， **我们需要一个虚拟屏幕来渲染环境** (从而记录帧). 
+
+因此，以下单元格将安装虚拟屏幕库并创建并运行虚拟屏幕🖥
+
+```bash
+sudo apt-get update
+apt install python3-opengl
+apt install ffmpeg
+apt install xvfb
+pip3 install pyvirtualdisplay
+```
+
+为了确保使用新安装的库， **有时需要重新启动笔记本运行时**。下一个单元格将强制 **运行时崩溃，因此您需要再次连接并从这里开始运行代码**。多亏了这个技巧， **我们将能够运行我们的虚拟屏幕。**
+
+```python
+import os
+
+os.kill(os.getpid(), 9)
+```
+
+```python
+# Virtual display
+from pyvirtualdisplay import Display
+
+virtual_display = Display(visible=0, size=(1400, 900))
+virtual_display.start()
+```
+
+## 导入包📦
+
+我们导入的另外一个库是 Huggingface_hub **能够从 Hub 上传和下载经过训练的模型**.
+
+
+Hugging Face Hub 🤗 是任何人都可以共享和探索模型和数据集的中心位置。它具有版本控制、指标、可视化和其他功能，可让您轻松与他人协作。
+
+您可以在这里看到所有可用的深度强化学习模型👉 https://huggingface.co/models?pipeline_tag=reinforcement-learning&sort=downloads
+
+
+
+```python
+import gymnasium
+
+from huggingface_sb3 import load_from_hub, package_to_hub
+from huggingface_hub import (
+    notebook_login,
+)  # To log to our Hugging Face account to be able to upload models to the Hub.
+
+from stable_baselines3 import PPO
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.monitor import Monitor
+```
+
+## 了解 Gymnasium 及其工作原理 🤖
+
+🏋 包含我们环境的库称为 Gymnasium。
+**您将在深度强化学习中大量使用 Gymnasium。**
+
+Gymnasium 是 **新版本的Gym库** [由 Farama 基金会维护](https://farama.org/).
+
+Gymnasium 库提供了两件事：
+
+- 一个界面可以让你 **创建 RL 环境**.
+- 一个 **环境集合** (gym-control、Atari、box2D...).
+
+让我们看一个示例，但首先让我们回顾一下 RL 循环。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/RL_process_game.jpg" alt="The RL process" width="100%">
+
+每一步：
+- 我们的代理收到 **状态 (S0)** 从 **环境** — 我们收到游戏的第一帧 (环境).
+- 基于此 **状态 (S0),** 代理采取 **行动 (A0)** — 我们的特工将移至右侧。
+- 环境转变为 **新的** **状态 (S1)** — 新框架。
+- 环境给了一些 **奖励 (R1)** 致特工——我们还没死 *(正面奖励+1)*.
+
+
+使用 Gymnasium：
+
+1️⃣ 我们使用以下方式创建环境 `gymnasium.make()`
+
+2️⃣ 我们将环境重置为初始状态 `observation = env.reset()`
+
+每一步：
+
+3️⃣ 使用我们的模型采取行动 (在我们的例子中，我们采取随机行动)
+
+4️⃣ 使用 `env.step(action)`，我们在环境中执行此操作并得到
+- `observation`: 新状态 (时间+1)
+- `reward`：执行动作后获得的奖励
+- `terminated`：表示剧集是否终止 (代理到达终止状态)
+- `truncated`：在此新版本中引入，它指示时间限制或例如代理是否超出环境范围。
+- `info`：提供附加信息的字典 (取决于环境).
+
+如需更多说明，请查看此 👉 https://gymnasium.farama.org/api/env/#gymnasium.Env.step
+
+如果剧集终止：
+- 我们将环境重置为其初始状态 `observation = env.reset()`
+
+**让我们看一个例子！** 请务必阅读代码
+
+
+```python
+import gymnasium as gym
+
+# First, we create our environment called LunarLander-v2
+env = gym.make("LunarLander-v2")
+
+# Then we reset this environment
+observation, info = env.reset()
+
+for _ in range(20):
+    # Take a random action
+    action = env.action_space.sample()
+    print("Action taken:", action)
+
+    # Do this action in the environment and get
+    # next_state, reward, terminated, truncated and info
+    observation, reward, terminated, truncated, info = env.step(action)
+
+    # If the game is terminated (in our case we land, crashed) or truncated (timeout)
+    if terminated or truncated:
+        # Reset the environment
+        print("Environment is reset")
+        observation, info = env.reset()
+
+env.close()
+```
+
+## 创建 LunarLander 环境🌛并了解其工作原理
+
+### 环境🎮
+
+在第一个教程中，我们将训练我们的代理，一个 [月球着陆器](https://gymnasium.farama.org/environments/box2d/lunar_lander/), **正确登陆月球**。为此，代理需要学习 **调整其速度和位置 (水平、垂直和角度) 正确着陆。**
+
+---
+
+
+💡 开始使用环境时的一个好习惯是检查其文档 
+
+👉 https://gymnasium.farama.org/environments/box2d/lunar_lander/
+
+---
+
+
+让我们看看环境是什么样的：
+
+
+```python
+# We create our environment with gym.make("<name_of_the_environment>")
+env = gym.make("LunarLander-v2")
+env.reset()
+print("_____OBSERVATION SPACE_____ \n")
+print("Observation Space Shape", env.observation_space.shape)
+print("Sample observation", env.observation_space.sample())  # Get a random observation
+```
+
+我们看到与 `Observation Space Shape (8,)` 观测结果是一个大小为 8 的向量，其中每个值包含有关着陆器的不同信息：
+- 水平焊盘坐标 (x)
+- 垂直焊盘坐标 (y)
+- 水平速度 (x)
+- 垂直速度 (y)
+- 角度
+- 角速度
+- 如果左腿接触点接触到地面 (布尔值)
+- 如果右腿接触点接触到地面 (布尔值)
+
+
+```python
+print("\n _____ACTION SPACE_____ \n")
+print("Action Space Shape", env.action_space.n)
+print("Action Space Sample", env.action_space.sample())  # Take a random action
+```
+
+行动空间 (代理可以采取的一组可能的操作) 是离散的，有 4 个可用操作🎮： 
+
+- 行动 0：什么也不做，
+- 动作1：启动左方向引擎，
+- 动作2：启动主机，
+- 动作3：向右发射定向引擎。
+
+奖励功能 (在每个时间步给出奖励的函数) 💰:
+
+每走一步后都会给予奖励。一集的总奖励是 **该集中所有步骤的奖励总和**.
+
+对于每一步，奖励：
+
+- 着陆器离着陆场越近/越远，则增加/减少。
+-  着陆器移动得越慢/越快，则增加/减少。
+- 着陆器倾斜得越多，则减小 (角度不水平).
+- 每一条与地面接触的腿增加 10 分。
+- 侧引擎点火每帧减少 0.03 点。
+- 主机每点火一帧就减少 0.3 点。
+
+该剧集收到 **坠毁或安全着陆分别获得 -100 或 +100 分的额外奖励。**
+
+有一集是 **如果得分至少为 200 分，则视为解决方案。**
+
+#### 矢量化环境
+
+- 我们创建一个矢量化环境 (一种将多个独立环境堆叠为单个环境的方法) 16 个环境，这样， **在训练中我们会有更多样的经历。**
+
+```python
+# Create the environment
+env = make_vec_env("LunarLander-v2", n_envs=16)
+```
+
+## 创建模型🤖
+
+- 我们研究了我们的环境并理解了这个问题： **通过控制左、右和主方向引擎，能够将月球着陆器正确着陆到着陆台**。现在让我们构建我们将用来解决这个问题的算法🚀。
+
+- 为此，我们将使用我们的第一个 Deep RL 库， [Stable Baselines3 (SB3)](https://stable-baselines3.readthedocs.io/en/master/).
+
+- SB3 是一组 **PyTorch 中强化学习算法的可靠实现**.
+
+---
+
+💡 使用新库时的一个好习惯是首先深入了解文档： https://stable-baselines3.readthedocs.io/en/master/ 然后尝试一些教程。
+
+----
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit1/sb3.png" alt="Stable Baselines3">
+
+为了解决这个问题，我们将使用SB3 **PPO**. [PPO (又名近端策略优化) 是 SOTA 之一 (最先进的) 您将在本课程中学习的深度强化学习算法](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html#example%5D).
+
+PPO 是以下各项的组合：
+- *基于价值的强化学习方法*：学习一个行动价值函数，它将告诉我们 **给定状态和行动时要采取的最有价值的行动**.
+- *基于策略的强化学习方法*：学习一项政策 **给我们一个行动的概率分布**.
+
+Stable-Baselines3 易于设置：
+
+1️⃣ 你 **创造你的环境** (在我们的例子中是上面完成的)
+
+2️⃣ 您定义 **您想要使用的模型并实例化该模型** `model = PPO("MlpPolicy")`
+
+3️⃣ 你 **培训代理人** 与 `model.learn` 并定义训练时间步数
+
+```
+# Create environment
+env = gym.make('LunarLander-v2')
+
+# Instantiate the agent
+model = PPO('MlpPolicy', env, verbose=1)
+# Train the agent
+model.learn(total_timesteps=int(2e5))
+```
+
+
+
+```python
+# TODO: Define a PPO MlpPolicy architecture
+# We use MultiLayerPerceptron (MLPPolicy) because the input is a vector,
+# if we had frames as input we would use CnnPolicy
+model =
+```
+
+#### 解决方案
+
+```python
+# SOLUTION
+# We added some parameters to accelerate the training
+model = PPO(
+    policy="MlpPolicy",
+    env=env,
+    n_steps=1024,
+    batch_size=64,
+    n_epochs=4,
+    gamma=0.999,
+    gae_lambda=0.98,
+    ent_coef=0.01,
+    verbose=1,
+)
+```
+
+## 训练 PPO 代理 🏃
+- 让我们训练我们的代理 1,000,000 个时间步，不要忘记在 Colab 上使用 GPU。大约需要 20 分钟，但如果您只是想尝试一下，可以使用更少的时间步长。
+- 训练期间，休息一下☕你应得的🤗
+
+```python
+# TODO: Train it for 1,000,000 timesteps
+
+# TODO: Specify file name for model and save the model to file
+model_name = "ppo-LunarLander-v2"
+```
+
+#### 解决方案
+
+```python
+# SOLUTION
+# Train it for 1,000,000 timesteps
+model.learn(total_timesteps=1000000)
+# Save the model
+model_name = "ppo-LunarLander-v2"
+model.save(model_name)
+```
+
+## 评估代理📈
+
+- 记得将环境包裹在 [监视器](https://stable-baselines3.readthedocs.io/en/master/common/monitor.html).
+- 现在我们的月球着陆器代理已经接受过训练🚀，我们需要 **检查其性能**.
+- Stable-Baselines3 提供了一种方法来做到这一点： `evaluate_policy`.
+- 要填充该部分，您需要 [检查文档](https://stable-baselines3.readthedocs.io/en/master/guide/examples.html#basic-usage-training-saving-loading)
+- 在下一步中，我们将看到 **如何自动评估和分享您的代理以在排行榜中竞争，但现在让我们自己做**
+
+
+💡 当你评估你的代理时，你不应该使用你的训练环境，而应该创建一个评估环境。
+
+```python
+# TODO: Evaluate the agent
+# Create a new environment for evaluation
+eval_env =
+
+# Evaluate the model with 10 evaluation episodes and deterministic=True
+mean_reward, std_reward = 
+
+# Print the results
+```
+
+#### 解决方案
+
+```python
+# @title
+eval_env = Monitor(gym.make("LunarLander-v2"))
+mean_reward, std_reward = evaluate_policy(model, eval_env, n_eval_episodes=10, deterministic=True)
+print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
+```
+
+- 就我而言，我得到了平均奖励 `200.20 +/- 20.80` 经过 100 万步训练后，这意味着我们的月球着陆器代理已准备好登陆月球🌛🥳。
+
+## 在 Hub 上发布我们训练好的模型 🔥
+现在我们看到训练后得到了很好的结果，我们可以用一行代码在集线器上发布训练好的模型🤗。
+
+📚 库文档 👉https://github.com/huggingface/huggingface_sb3/tree/main#hugging-face--x-stable-baselines3-v20
+
+这是模型卡的示例 (与 Space Invaders):
+
+通过使用 `package_to_hub` **您评估、记录重播、生成代理的模型卡并将其推送到 Hub**.
+
+这样：
+- 你可以 **展示我们的工作** 🔥
+- 你可以 **想象你的经纪人正在打球** 👀
+- 你可以 **与社区分享其他人可以使用的代理** 💾
+- 你可以 **访问排行榜🏆，查看您的代理与您的同学相比表现如何** 👉 https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard
+
+
+为了能够与社区共享您的模型，还需要遵循三个步骤：
+
+1️⃣ (如果还没有完成) 在 Hugging Face 上创建一个帐户 ➡ https://huggingface.co/join
+
+2️⃣ 登录，然后，您需要存储来自 Hugging Face 网站的身份验证令牌。
+- 创建一个新令牌 (https://huggingface.co/settings/tokens) **具有写入角色**
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/create-token.jpg" alt="Create HF Token">
+
+- 复制令牌 
+- 运行下面的单元格并粘贴令牌
+
+```python
+notebook_login()
+!git config --global credential.helper store
+```
+
+如果您不想使用 Google Colab 或 Jupyter Notebook，则需要使用以下命令： `huggingface-cli login`
+
+3️⃣ 我们现在准备好将我们训练有素的代理推送到🤗 Hub 🔥 使用 `package_to_hub()` 功能
+
+让我们填写 `package_to_hub` 功能：
+- `model`：我们训练有素的模型。
+- `model_name`：我们定义的训练模型的名称 `model_save`
+- `model_architecture`：我们使用的模型架构，在我们的例子中为 PPO
+- `env_id`：在我们的例子中是环境的名称 `LunarLander-v2`
+- `eval_env`：eval_env中定义的评估环境
+- `repo_id`：将创建/更新的 Hugging Face Hub 存储库的名称 `(repo_id = {username}/{repo_name})`
+
+💡 **一个好名字是 `{username}/{model_architecture}-{env_id}` **
+
+- `commit_message`: 提交的消息
+
+```python
+import gymnasium as gym
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.env_util import make_vec_env
+
+from huggingface_sb3 import package_to_hub
+
+## TODO: Define a repo_id
+## repo_id is the id of the model repository from the Hugging Face Hub (repo_id = {organization}/{repo_name} for instance ThomasSimonini/ppo-LunarLander-v2
+repo_id = 
+
+# TODO: Define the name of the environment
+env_id = 
+
+# Create the evaluation env and set the render_mode="rgb_array"
+eval_env = DummyVecEnv([lambda: gym.make(env_id, render_mode="rgb_array")])
+
+
+# TODO: Define the model architecture we used
+model_architecture = ""
+
+## TODO: Define the commit message
+commit_message = ""
+
+# method save, evaluate, generate a model card and record a replay video of your agent before pushing the repo to the hub
+package_to_hub(model=model, # Our trained model
+               model_name=model_name, # The name of our trained model 
+               model_architecture=model_architecture, # The model architecture we used: in our case PPO
+               env_id=env_id, # Name of the environment
+               eval_env=eval_env, # Evaluation Environment
+               repo_id=repo_id, # id of the model repository from the Hugging Face Hub (repo_id = {organization}/{repo_name} for instance ThomasSimonini/ppo-LunarLander-v2
+               commit_message=commit_message)
+```
+
+#### 解决方案
+
+
+```python
+import gymnasium as gym
+
+from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.env_util import make_vec_env
+
+from huggingface_sb3 import package_to_hub
+
+# PLACE the variables you've just defined two cells above
+# Define the name of the environment
+env_id = "LunarLander-v2"
+
+# TODO: Define the model architecture we used
+model_architecture = "PPO"
+
+## Define a repo_id
+## repo_id is the id of the model repository from the Hugging Face Hub (repo_id = {organization}/{repo_name} for instance ThomasSimonini/ppo-LunarLander-v2
+## CHANGE WITH YOUR REPO ID
+repo_id = "ThomasSimonini/ppo-LunarLander-v2"  # Change with your repo id, you can't push with mine 😄
+
+## Define the commit message
+commit_message = "Upload PPO LunarLander-v2 trained agent"
+
+# Create the evaluation env and set the render_mode="rgb_array"
+eval_env = DummyVecEnv([lambda: Monitor(gym.make(env_id, render_mode="rgb_array"))])
+
+# PLACE the package_to_hub function you've just filled here
+package_to_hub(
+    model=model,  # Our trained model
+    model_name=model_name,  # The name of our trained model
+    model_architecture=model_architecture,  # The model architecture we used: in our case PPO
+    env_id=env_id,  # Name of the environment
+    eval_env=eval_env,  # Evaluation Environment
+    repo_id=repo_id,  # id of the model repository from the Hugging Face Hub (repo_id = {organization}/{repo_name} for instance ThomasSimonini/ppo-LunarLander-v2
+    commit_message=commit_message,
+)
+```
+
+恭喜 🥳 您刚刚训练并上传了您的第一个深度强化学习代理。上面的脚本应该显示一个模型存储库的链接，例如 https://huggingface.co/osanseviero/test_sb3. 当您访问此链接时，您可以：
+* 在右侧查看您的代理的视频预览。 
+* 单击“文件和版本”可查看存储库中的所有文件。
+* 单击“在 stable-baselines3 中使用”以获取显示如何加载模型的代码片段。
+* 模型卡一张 (`README.md` 文件) 其中给出了模型的描述
+
+在幕后，Hub 使用基于 git 的存储库 (如果您不知道 git 是什么，请不要担心)，这意味着您可以在试验和改进代理时使用新版本更新模型。
+
+使用排行榜比较您的 LunarLander-v2 与同学的成绩 🏆 👉 https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard
+
+## 从 Hub 加载已保存的 LunarLander 模型 🤗
+感谢 [铁棒](https://github.com/ironbar) 为了贡献。
+
+从 Hub 加载保存的模型非常简单。 
+
+你去 https://huggingface.co/models?library=stable-baselines3 查看所有已保存的 Stable-baselines3 模型的列表。
+1. 您选择一个并复制其 repo_id
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/unit1/copy-id.png" alt="Copy-id"/>
+
+2. 然后我们只需要使用 load_from_hub：
+- repo_id
+- 文件名：存储库中保存的模型及其扩展名 (*.zip)
+
+因为我从Hub下载的模型是用Gym训练的 (Gymnasium 的旧版本) 我们需要安装shimmy一个API转换工具，它将帮助我们正确运行环境。
+
+摆振文档： https://github.com/Farama-Foundation/Shimmy
+
+```python
+!pip install shimmy
+```
+
+```python
+from huggingface_sb3 import load_from_hub
+
+repo_id = "Classroom-workshop/assignment2-omar"  # The repo_id
+filename = "ppo-LunarLander-v2.zip"  # The model filename.zip
+
+# When the model was trained on Python 3.8 the pickle protocol is 5
+# But Python 3.6, 3.7 use protocol 4
+# In order to get compatibility we need to:
+# 1. Install pickle5 (we done it at the beginning of the colab)
+# 2. Create a custom empty object we pass as parameter to PPO.load()
+custom_objects = {
+    "learning_rate": 0.0,
+    "lr_schedule": lambda _: 0.0,
+    "clip_range": lambda _: 0.0,
+}
+
+checkpoint = load_from_hub(repo_id, filename)
+model = PPO.load(checkpoint, custom_objects=custom_objects, print_system_info=True)
+```
+
+我们来评价一下这个代理：
+
+```python
+# @title
+eval_env = Monitor(gym.make("LunarLander-v2"))
+mean_reward, std_reward = evaluate_policy(model, eval_env, n_eval_episodes=10, deterministic=True)
+print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
+```
+
+## 一些额外的挑战🏆
+最好的学习方式 **就是自己去尝试**！正如您所看到的，当前的代理表现不佳。作为第一个建议，您可以训练更多步数。通过 1,000,000 步，我们看到了一些很棒的结果！ 
+
+在 [排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard) 你会找到你的代理人。你能到达顶峰吗？
+
+以下是实现这一目标的一些想法：
+* 训练更多步数
+* 尝试不同的超参数 `PPO`。您可以在以下位置查看它们： https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html#parameters.
+* 检查 [Stable-Baselines3 文档](https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html) 并尝试其他型号，例如 DQN。
+* **推送您新训练的模型** 在 Hub 🔥
+
+**将您的 LunarLander-v2 的结果与您的同学进行比较** 使用 [排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard) 🏆
+
+登月对你来说太无聊了吗？尝试 **改变环境**，为什么不使用 MountainCar-v0、CartPole-v1 或 CarRacing-v0？检查它们如何工作 [使用Gym 文档](https://www.gymlibrary.dev/) 玩得开心🎉。
+
+________________________________________________________________________
+恭喜您完成本章！那是最大的一个， **并且有很多信息。**
+
+如果您仍然对所有这些元素感到困惑......这是完全正常的！ **这对我和所有研究 RL 的人来说都是一样的。**
+
+花点时间真正 **在继续之前掌握材料并尝试其他挑战**。掌握这些要素并打下坚实的基础非常重要。
+
+当然，在课程中，我们将深入研究这些概念，但是 **在深入学习下一章之前，最好现在就对它们有一个很好的理解。**
+
+
+下次，在奖励单元 1 中，您将训练 Huggy the Dog 取回棍子。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/notebooks/unit1/huggy.jpg" alt="Huggy"/>
+
+## 不断学习，保持优秀🤗

@@ -1,0 +1,31 @@
+# Unity ML-Agents简介 [[introduction-to-ml-agents]]
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/thumbnail.png" alt="thumbnail"/>
+
+强化学习的挑战之一是 **创造环境**。幸运的是，我们可以使用游戏引擎来做到这一点。
+这些发动机，例如 [Unity](https://unity.com/), [Godot](https://godotengine.org/) 或 [Unreal Engine](https://www.unrealengine.com/)，是用于创建视频游戏的程序。他们非常适合
+用于创建环境：它们提供物理系统、2D/3D 渲染等。
+
+
+其中之一， [Unity](https://unity.com/)，创建了 [Unity ML-Agents Toolkit](https://github.com/Unity-Technologies/ml-agents)，一个基于游戏引擎 Unity 的插件，它允许我们 **使用 Unity 游戏引擎作为环境构建器来训练代理**。在第一个奖励单元中，这就是我们用来训练 Huggy 抓住棍子的东西！
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit5/example-envs.png" alt="MLAgents environments"/>
+<figcaption>来源： <a href="https://github.com/Unity-Technologies/ml-agents">ML-Agents 文档</a></figcaption>
+</figure>
+
+Unity ML-Agents Toolkit 提供了许多出色的预制环境，从踢足球到 (足球)，学习走路，跳过高墙。
+
+在本单元中，我们将学习使用 ML-Agents，但是 **如果您不知道如何使用 Unity 游戏引擎，请不要担心**：您不需要用它来培训您的代理。
+
+所以，今天，我们要训练两名特工：
+- 第一个将学习 **将雪球射到产卵目标上**.
+- 第二个需要 **按一个按钮生成一个金字塔，然后导航到金字塔，将其打倒，然后移动到顶部的金砖**。为此，它需要探索其环境，这将使用一种称为好奇心的技术来完成。
+
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit7/envs.png" alt="Environments" />
+
+然后，经过训练， **您将把训练有素的代理推送到 Hugging Face Hub**，你将能够 **可视化它们直接在浏览器上播放，无需使用 Unity 编辑器**.
+
+完成本单元将 **为您准备下一个挑战：AI vs. AI，您将在多智能体环境中训练智能体并与同学的智能体竞争**.
+
+听起来令人兴奋吗？让我们开始吧！

@@ -1,0 +1,45 @@
+# RL 中的语言模型
+## LM 为智能体编码有用的知识
+
+**语言模型** (LM) 在处理文本（例如回答问题甚至逐步推理）时可以表现出令人印象深刻的能力。此外，他们对大量文本语料库的训练使他们能够 **编码各种类型的知识，包括有关我们世界的物理规则的抽象知识** (例如，可以对物体做什么，旋转物体时会发生什么……).
+
+最近研究的一个自然问题是，在尝试解决日常任务时，这些知识是否可以使机器人等代理受益。虽然这些工作显示出有趣的结果，但所提出的代理缺乏任何学习方法。 **这种限制阻止了这些代理适应环境 (例如纠正错误的知识) 或学习新技能。**
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit12/language.png" alt="Language">
+<figcaption>来源： <a href="https://ai.googleblog.com/2022/08/towards-helpful-robots-grounding.html">走向有用的机器人：机器人可供性中的语言基础</a></figcaption>
+</figure>
+
+## LM 和 RL
+
+因此，LM 和 RL 之间存在潜在的协同作用，LM 可以带来关于世界的知识，RL 可以通过与环境交互来调整和纠正这些知识。从 RL 的角度来看，这是特别有趣的，因为 RL 字段主要依赖于 **白板** 设置代理从头开始学习所有内容，从而导致：
+
+1) 样本效率低下
+
+2) 人类眼睛中意想不到的行为
+
+作为第一次尝试，该论文 [“通过在线强化学习为大型语言模型奠定基础”](https://arxiv.org/abs/2302.02662v1) 解决了问题 **使用 PPO 使 LM 适应或对齐文本环境**。他们表明，LM 中编码的知识可以快速适应环境 (为样品高效 RL 代理开辟途径) 而且这些知识可以让语言模型在调整后更好地推广到新任务。
+
+<video src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit12/papier_v4.mp4" type="video/mp4" controls />
+
+另一个研究方向是 [“用大型语言模型指导强化学习预训练”](https://arxiv.org/abs/2302.06692) 是让登月舱保持冻结状态，但利用其知识 **指导 RL 代理的探索**。这种方法允许 RL 代理被引导到对人类有意义且看似有用的行为，而无需在训练期间有人参与循环。
+
+<figure>
+<img src="https://huggingface.co/datasets/huggingface-deep-rl-course/course-images/resolve/main/en/unit12/language2.png" alt="Language">
+<figcaption> 来源： <a href="https://ai.googleblog.com/2022/08/towards-helpful-robots-grounding.html"> 走向有用的机器人：机器人可供性中的语言基础</a>  </figcaption>
+</figure>
+
+一些限制使得这些工作仍然非常初步，例如需要在将代理的观察结果提供给 LM 之前将其转换为文本，以及与非常大的 LM 交互的计算成本。
+
+## 进一步阅读
+
+如需了解更多信息，我们建议您查看以下资源：
+
+- [Google 研究，2022 年及以后：机器人技术](https://ai.googleblog.com/2023/02/google-research-2022-beyond-robotics.html)
+- [用于交互式决策的预训练语言模型](https://arxiv.org/abs/2202.01771)
+- [通过在线强化学习为大型语言模型奠定基础](https://arxiv.org/abs/2302.02662v1)
+- [使用大型语言模型指导强化学习的预训练](https://arxiv.org/abs/2302.06692)
+
+## 作者
+
+本节的作者是 <a href="https://twitter.com/ClementRomac"> 克莱门特·罗马克 </a>
